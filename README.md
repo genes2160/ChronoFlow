@@ -11,7 +11,7 @@ ChronoFlow is a lightweight media ingestion and processing pipeline that:
 
 ---
 ## 📁 Folder Structure
-
+```
 project/
 │
 ├── app/
@@ -21,7 +21,7 @@ project/
 ├── logs/
 ├── runner.py
 └── config.py
-
+```
 ---
 
 ## ⚙️ Features
@@ -59,13 +59,13 @@ python runner.py
 data/organized/YYYY-MM-DD/
 
 Example:
-
+```
 2026-03-24/
 ├── meeting-audio.webm
 ├── meeting-video.webm
 ├── transcript.json
 ├── summary.json
-
+```
 ---
 
 ## 🔁 Idempotency
