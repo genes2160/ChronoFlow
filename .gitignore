@@ -1,3 +1,7 @@
 .env
 .log
 data/
+*.pyc
+__pycache__
+logs/
+logs/processed_files.json
