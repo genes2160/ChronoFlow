@@ -11,15 +11,19 @@ BASE_DIR = Path("data/organized")
 def find_transcripts():
     transcripts = []
 
+    # Iterate through the folders in the base directory
     for folder in BASE_DIR.iterdir():
         if not folder.is_dir():
             continue
 
+        # Look for JSON files in each folder
         for file in folder.glob("*.json"):
-            if file.name == "summary.json":
+            if "summary" in file.name:
                 continue
 
-            transcripts.append(file)
+            # Get the file size in bytes
+            file_size = file.stat().st_size  # Get file size in bytes
+            transcripts.append((file, file_size))  # Append the file and its size
 
     return transcripts
 
@@ -27,18 +31,20 @@ def find_transcripts():
 def select_files(files):
     print("\n📂 Available Transcripts:\n")
 
-    for i, f in enumerate(files):
-        print(f"[{i}] {f.parent.name} → {f.name}")
+    # Print available files with their sizes
+    for i, (f, size) in enumerate(files):
+        size_in_kb = size / 1024  # Convert bytes to kilobytes
+        print(f"[{i}] {f.parent.name} → {f.name} (Size: {size_in_kb:.2f} KB)")
 
     choice = input("\n👉 Select file(s) (e.g. 0 or 0,2): ")
 
     try:
+        # Parse the selection and return the chosen files
         indexes = [int(x.strip()) for x in choice.split(",")]
-        return [files[i] for i in indexes]
+        return [files[i][0] for i in indexes]  # Return just the file paths
     except Exception:
         print("❌ Invalid selection")
         return []
-
 
 def parse_response(raw: str) -> dict:
     text = raw.strip()
