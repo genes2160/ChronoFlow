@@ -1,0 +1,14 @@
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+python-multipart>=0.0.9
+requests
+
+# database
+sqlmodel>=0.0.21
+sqlalchemy>=2.0.0
+
+# drivers — uncomment the one you need
+psycopg2-binary>=2.9.0        # postgres (binary, no build deps)
+asyncpg>=0.29.0               # postgres async (if you switch to async engine later)

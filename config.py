@@ -10,7 +10,8 @@ LOG_DIR = Path("logs")
 
 TRACK_FILE = LOG_DIR / "processed_files.json"
 
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openrouter")
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "groq")
+print(".....LLM_PROVIDER", LLM_PROVIDER, os.getenv("LLM_PROVIDER"))
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 JINA_API_KEY = os.getenv("JINA_API_KEY")

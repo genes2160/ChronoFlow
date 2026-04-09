@@ -1,9 +1,12 @@
-from app.utils import log
+from app.utils import log, STATUS
 import json
 from app.llm.manager import get_llm
 from app.llm.prompt import build_prompt
 
 def process_json_files(files, tracker):
+    success_count = 0
+    skipped_count = 0
+    failed_count = 0
     for f in files:
         if f["type"] != "transcript":
             continue
@@ -12,6 +15,7 @@ def process_json_files(files, tracker):
 
         if name in tracker:
             log("skip", f"Already processed: {name}")
+            skipped_count += 1
             continue
 
         try:
@@ -22,37 +26,36 @@ def process_json_files(files, tracker):
 
             log("llm", f"Running LLM on {name}")
 
-            summary = run_llm(data)
-
-            save_summary(f["organized_path"].parent, summary)
-
             tracker[name] = True
 
             log("success", f"Processed successfully: {name}")
-
+            success_count+=1
         except Exception as e:
             log("error", f"{name} failed → {e}")
-
-
-
-def run_llm(data):
-    # llm = get_llm()
-
-    # prompt = build_prompt(data)
-
-    # log("llm", "Sending to LLM...")
-
-    # response = llm.generate(prompt)
-    # for attempt in range(3):
-    #     try:
-    #         return llm.generate(prompt)
-    #     except Exception:
-    #         log("warn", f"Retry {attempt+1}")
+            failed_count+=1
     return {
-        # "raw": response,
-        "summary": "Auto-generated summary",
-        "length": len(str(data))
+        "status": STATUS["completed"],
+        "message": f"Processed {success_count}, failed {failed_count} and skipped {skipped_count} records out of {len(files)}"
     }
+
+
+def get_summary(folder):
+    out = folder / "summary.json"
+    if not out.exists():
+        return []
+
+    try:
+        with open(out, encoding="utf8") as f:
+            content = f.read().strip()
+
+            if not content:
+                return []
+
+            return json.loads(content)
+
+    except json.JSONDecodeError:
+        print("⚠️ Summary file corrupted. Resetting...")
+        return []
 
 
 def save_summary(folder, summary):

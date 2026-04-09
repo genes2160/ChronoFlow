@@ -5,6 +5,9 @@ from config import ANTHROPIC_API_KEY, MODEL_MAP
 
 
 class AnthropicLLM:
+    def model_name(self):
+        return MODEL_MAP["anthropic"]
+    
     def generate(self, prompt: str):
         try:
             start = time.time()

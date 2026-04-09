@@ -5,6 +5,9 @@ from config import GROQ_API_KEY, MODEL_MAP
 
 
 class GroqLLM:
+    def model_name(self):
+        return MODEL_MAP["groq"]
+    
     def generate(self, prompt: str):
         try:
             start = time.time()

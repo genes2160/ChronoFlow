@@ -5,6 +5,9 @@ from config import JINA_API_KEY, MODEL_MAP
 
 
 class JinaLLM:
+    def model_name(self):
+        return MODEL_MAP["jina"]
+    
     def generate(self, prompt: str):
         try:
             start = time.time()

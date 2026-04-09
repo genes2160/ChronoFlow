@@ -5,6 +5,9 @@ from config import OPENROUTER_API_KEY, MODEL_MAP
 
 
 class OpenRouterLLM:
+    def model_name(self):
+        return MODEL_MAP["openrouter"]
+    
     def generate(self, prompt: str):
         try:
             start = time.time()
