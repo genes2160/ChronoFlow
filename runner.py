@@ -38,11 +38,13 @@ def main():
 
     organized = organize(normalized)
 
-    process_json_files(organized, tracker)
+    statuses = process_json_files(organized, tracker)
 
     save_tracker(tracker)
 
-    log("success", "Pipeline complete")
+    log("success", f"Scanned {len(files)} files, Pipeline complete; {statuses}")
+    
+    return statuses
 
 
 if __name__ == "__main__":

@@ -6,24 +6,24 @@ from app.llm.jina import JinaLLM
 from app.utils import log
 
 
-def get_llm():
-    log("llm", f"Selecting provider: {LLM_PROVIDER}")
+def get_llm(llm_provider=LLM_PROVIDER):
+    log("llm", f"Selecting provider: {llm_provider}")
 
-    if LLM_PROVIDER == "openrouter":
+    if llm_provider == "openrouter":
         log("llm", "Using OpenRouter")
         return OpenRouterLLM()
 
-    if LLM_PROVIDER == "groq":
+    if llm_provider == "groq":
         log("llm", "Using Groq")
         return GroqLLM()
 
-    if LLM_PROVIDER == "jina":
+    if llm_provider == "jina":
         log("llm", "Using Jina")
         return JinaLLM()
 
-    if LLM_PROVIDER == "anthropic":
+    if llm_provider == "anthropic":
         log("llm", "Using Anthropic")
         return AnthropicLLM()
 
-    log("error", f"Invalid provider: {LLM_PROVIDER}")
+    log("error", f"Invalid provider: {llm_provider}")
     raise ValueError("Invalid LLM provider")

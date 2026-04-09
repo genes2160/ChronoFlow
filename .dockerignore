@@ -1,4 +1,4 @@
-.env
+
 .log
 data/
 *.pyc
@@ -8,5 +8,3 @@ logs/processed_files.json
 **/__pycache__
 .git
 logs/
-chronoflow_db.sql
-testem.log

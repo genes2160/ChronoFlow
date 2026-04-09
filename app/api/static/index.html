@@ -1,0 +1,3098 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChronoFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        :root {
+            --ink: #1a1a18;
+            --ink2: #4a4a46;
+            --ink3: #9a9a94;
+            --rule: #e8e6e0;
+            --rule2: #f3f1ec;
+            --page: #faf9f7;
+            --paper: #fff;
+            --tc: #0f6e56;
+            --tm: #1d9e75;
+            --tl: #e1f5ee;
+            --ac: #854f0b;
+            --am: #ef9f27;
+            --al: #faeeda;
+            --cc: #993c1d;
+            --cm: #d85a30;
+            --cl: #faece7;
+            --pc: #3c3489;
+            --pm: #534ab7;
+            --pl: #eeedfe;
+            --bc: #185fa5;
+            --bm: #378add;
+            --bl: #e6f1fb;
+            --fs: 'Fraunces', Georgia, serif;
+            --fd: 'DM Sans', system-ui, sans-serif;
+        }
+
+        @media(prefers-color-scheme:dark) {
+            :root {
+                --ink: #f0ede8;
+                --ink2: #b4b2a9;
+                --ink3: #5f5e5a;
+                --rule: #2c2c2a;
+                --rule2: #1c1c1a;
+                --page: #111110;
+                --paper: #1c1c1a;
+                --tl: #04342c;
+                --al: #412402;
+                --cl: #4a1b0c;
+                --pl: #26215c;
+                --bl: #042c53;
+            }
+        }
+
+        body {
+            font-family: var(--fd);
+            background: var(--page);
+            color: var(--ink);
+            font-size: 13px;
+            line-height: 1.5;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .shell {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            grid-template-rows: 56px 1fr;
+            height: 100vh;
+        }
+
+        /* topbar */
+        .topbar {
+            grid-column: 1/-1;
+            display: flex;
+            align-items: center;
+            padding: 0 28px;
+            background: var(--paper);
+            border-bottom: 1px solid var(--rule);
+            gap: 18px;
+        }
+
+        .wordmark {
+            font-family: var(--fs);
+            font-size: 20px;
+            font-weight: 300;
+            letter-spacing: -0.03em;
+            color: var(--ink);
+        }
+
+        .wordmark em {
+            font-style: italic;
+            color: var(--tm);
+        }
+
+        .vdiv {
+            width: 1px;
+            height: 18px;
+            background: var(--rule);
+        }
+
+        .topbar-sub {
+            font-size: 11px;
+            color: var(--ink3);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .topbar-r {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .api-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--tc);
+            background: var(--tl);
+            padding: 4px 12px;
+            border-radius: 100px;
+        }
+
+        .dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--tm);
+            animation: breathe 2.4s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .3
+            }
+        }
+
+        .clock {
+            font-size: 12px;
+            color: var(--ink3);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: .04em;
+        }
+
+        /* sidebar */
+        .sidebar {
+            background: var(--paper);
+            border-right: 1px solid var(--rule);
+            padding: 16px 0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .ns {
+            padding: 14px 22px 5px;
+            font-size: 10px;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--ink3);
+        }
+
+        .ns:first-child {
+            padding-top: 6px;
+        }
+
+        .nl {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 22px;
+            font-size: 13px;
+            color: var(--ink2);
+            cursor: pointer;
+            transition: all .14s;
+            border-left: 2px solid transparent;
+            user-select: none;
+        }
+
+        .nl:hover {
+            color: var(--ink);
+            background: var(--rule2);
+        }
+
+        .nl.on {
+            color: var(--tc);
+            border-left-color: var(--tm);
+            background: var(--tl);
+            font-weight: 500;
+        }
+
+        .nl svg {
+            width: 15px;
+            height: 15px;
+            opacity: .55;
+            flex-shrink: 0;
+        }
+
+        .nl.on svg {
+            opacity: 1;
+        }
+
+        .nbadge {
+            margin-left: auto;
+            font-size: 11px;
+            background: var(--al);
+            color: var(--ac);
+            padding: 1px 7px;
+            border-radius: 100px;
+        }
+
+        /* main */
+        .main {
+            overflow-y: auto;
+            padding: 32px 36px;
+            background: var(--page);
+        }
+
+        .view {
+            display: none;
+            animation: reveal .18s ease;
+        }
+
+        .view.on {
+            display: block;
+        }
+
+        @keyframes reveal {
+            from {
+                opacity: 0;
+                transform: translateY(6px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        /* page head */
+        .ph {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .pt {
+            font-family: var(--fs);
+            font-size: 25px;
+            font-weight: 300;
+            letter-spacing: -.02em;
+            line-height: 1.1;
+        }
+
+        .pt em {
+            font-style: italic;
+            color: var(--tm);
+        }
+
+        .pm {
+            font-size: 12px;
+            color: var(--ink3);
+            margin-top: 4px;
+        }
+
+        /* stat strip */
+        .strip {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            background: var(--paper);
+            border: 1px solid var(--rule);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .sc {
+            padding: 18px 20px;
+            border-right: 1px solid var(--rule);
+        }
+
+        .sc:last-child {
+            border-right: none;
+        }
+
+        .sl {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--ink3);
+            margin-bottom: 6px;
+        }
+
+        .sv {
+            font-family: var(--fs);
+            font-size: 26px;
+            font-weight: 300;
+            line-height: 1;
+            color: var(--ink);
+        }
+
+        .sv.t {
+            color: var(--tc)
+        }
+
+        .sv.a {
+            color: var(--ac)
+        }
+
+        .sv.c {
+            color: var(--cc)
+        }
+
+        .ss {
+            font-size: 11px;
+            color: var(--ink3);
+            margin-top: 3px;
+        }
+
+        /* two col */
+        .tc2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        /* card */
+        .card {
+            background: var(--paper);
+            border: 1px solid var(--rule);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 18px;
+        }
+
+        .ch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 13px 20px;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .ct {
+            font-family: var(--fs);
+            font-size: 15px;
+            font-weight: 300;
+            letter-spacing: -.01em;
+        }
+
+        .ca {
+            font-size: 11px;
+            color: var(--tm);
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-family: var(--fd);
+            padding: 3px 8px;
+            border-radius: 4px;
+            transition: background .14s;
+        }
+
+        .ca:hover {
+            background: var(--tl);
+        }
+
+        /* table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--ink3);
+            padding: 9px 20px;
+            text-align: left;
+            background: var(--rule2);
+            border-bottom: 1px solid var(--rule);
+            font-weight: 400;
+        }
+
+        td {
+            padding: 11px 20px;
+            border-bottom: 1px solid var(--rule);
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr {
+            cursor: pointer;
+            transition: background .1s;
+        }
+
+        tbody tr:hover td {
+            background: var(--rule2);
+        }
+
+        /* tags */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 100px;
+            white-space: nowrap;
+        }
+
+        .tag.t {
+            background: var(--tl);
+            color: #e5e9ed;
+        }
+
+        .tag.a {
+            background: var(--al);
+            color: #e5e9ed;
+        }
+
+        .tag.c {
+            background: var(--cl);
+            color: var(--cc);
+        }
+
+        .tag.p {
+            background: var(--pl);
+            color: var(--pc);
+        }
+
+        .tag.b {
+            background: var(--bl);
+            color: #e5e9ed;
+        }
+
+        /* score bar */
+        .sb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sbt {
+            flex: 1;
+            height: 3px;
+            background: var(--rule);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .sbf {
+            height: 100%;
+            border-radius: 2px;
+            background: var(--tm);
+            transition: width .5s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        .sbv {
+            font-size: 12px;
+            color: var(--ink2);
+            min-width: 24px;
+            text-align: right;
+        }
+
+        /* buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-family: var(--fd);
+            font-size: 12px;
+            cursor: pointer;
+            border: 1px solid var(--rule);
+            background: var(--paper);
+            color: var(--ink);
+            transition: all .14s;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            border-color: var(--ink3);
+        }
+
+        .btn-k {
+            background: var(--ink);
+            color: var(--paper);
+            border-color: var(--ink);
+        }
+
+        .btn-k:hover {
+            background: var(--ink2);
+            border-color: var(--ink2);
+        }
+
+        .btn-t {
+            background: var(--tl);
+            color: var(--tc);
+            border-color: transparent;
+        }
+
+        .btn-t:hover {
+            background: var(--tm);
+            color: #fff;
+        }
+
+        .bg {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        /* pipeline cards */
+        .pc {
+            background: var(--paper);
+            border: 1px solid var(--rule);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: border-color .2s;
+        }
+
+        .pc:hover {
+            border-color: var(--ink3);
+        }
+
+        .pn {
+            font-family: var(--fs);
+            font-size: 30px;
+            font-weight: 300;
+            color: var(--rule);
+            line-height: 1;
+            width: 40px;
+            flex-shrink: 0;
+        }
+
+        .pi h3 {
+            font-family: var(--fs);
+            font-size: 16px;
+            font-weight: 300;
+            letter-spacing: -.01em;
+            margin-bottom: 3px;
+        }
+
+        .pi p {
+            font-size: 12px;
+            color: var(--ink3);
+        }
+
+        /* terminal */
+        .term {
+            font-family: 'Menlo', 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.7;
+            background: #1a1a18;
+            color: #9effc0;
+            padding: 16px 20px;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-top: 14px;
+        }
+
+        /* modal */
+        .ov {
+            position: fixed;
+            inset: 0;
+            background: rgba(26, 26, 24, .48);
+            z-index: 900;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .ov.open {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--paper);
+            border: 1px solid var(--rule);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 660px;
+            max-height: 84vh;
+            overflow-y: auto;
+            animation: pop .18s ease;
+        }
+
+        @keyframes pop {
+            from {
+                transform: scale(.97) translateY(8px);
+                opacity: 0
+            }
+
+            to {
+                transform: none;
+                opacity: 1
+            }
+        }
+
+        .mt {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            padding: 22px 26px 16px;
+            border-bottom: 1px solid var(--rule);
+            position: sticky;
+            top: 0;
+            background: var(--paper);
+            z-index: 1;
+        }
+
+        .mh {
+            font-family: var(--fs);
+            font-size: 19px;
+            font-weight: 300;
+            letter-spacing: -.02em;
+        }
+
+        .md {
+            font-size: 12px;
+            color: var(--ink3);
+            margin-top: 2px;
+        }
+
+        .mc {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--ink3);
+            font-size: 18px;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .mc:hover {
+            color: var(--ink);
+            background: var(--rule2);
+        }
+
+        .mb {
+            padding: 20px 26px 26px;
+        }
+
+        .dg {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .db {
+            background: var(--rule2);
+            border-radius: 8px;
+            padding: 14px;
+        }
+
+        .dbl {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--ink3);
+            margin-bottom: 5px;
+        }
+
+        .dbv {
+            font-family: var(--fs);
+            font-size: 19px;
+            font-weight: 300;
+        }
+
+        .slabel {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--ink3);
+            margin-bottom: 10px;
+            margin-top: 18px;
+        }
+
+        .pr {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 9px 0;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .pr:last-child {
+            border-bottom: none;
+        }
+
+        .av {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--pl);
+            color: #e5e9ed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .pname {
+            flex: 1;
+            font-size: 13px;
+        }
+
+        .fc {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--rule2);
+            border: 1px solid var(--rule);
+            border-radius: 4px;
+            padding: 3px 9px;
+            font-size: 11px;
+            margin: 3px;
+            color: var(--ink2);
+        }
+
+        .fext {
+            color: var(--tc);
+            font-weight: 500;
+        }
+
+        /* toast */
+        .toasts {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            background: var(--paper);
+            border: 1px solid var(--rule);
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 12px;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: sin .2s ease;
+            box-shadow: 0 2px 16px rgba(0, 0, 0, .08);
+            max-width: 310px;
+        }
+
+        @keyframes sin {
+            from {
+                transform: translateX(12px);
+                opacity: 0
+            }
+        }
+
+        .spin {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 1.5px solid var(--rule);
+            border-top-color: var(--tm);
+            border-radius: 50%;
+            animation: rot .7s linear infinite;
+        }
+
+        @keyframes rot {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        .muted {
+            color: var(--ink3);
+        }
+    </style>
+    <style id="detail-styles">
+        /* tabs */
+        .tabs {
+            display: flex;
+            gap: 2px;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--rule);
+            background: var(--paper);
+        }
+
+        .tab {
+            padding: 10px 16px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--ink3);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: color .15s, border-color .15s;
+            white-space: nowrap;
+        }
+
+        .tab.on {
+            color: var(--tm);
+            border-bottom-color: var(--tm);
+        }
+
+        .tab:hover:not(.on) {
+            color: var(--ink2);
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.on {
+            display: block;
+        }
+
+        /* kv row */
+        .kv {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 9px 0;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .kv:last-child {
+            border-bottom: none;
+        }
+
+        .kv-l {
+            width: 130px;
+            flex-shrink: 0;
+            font-size: 11px;
+            color: var(--ink3);
+            padding-top: 2px;
+            line-height: 1.4;
+        }
+
+        .kv-v {
+            font-size: 13px;
+            flex: 1;
+            line-height: 1.5;
+        }
+
+        /* segment */
+        .seg {
+            padding: 12px;
+            border: 1px solid var(--rule);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .seg-phase {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--tm);
+            margin-bottom: 4px;
+        }
+
+        .seg-desc {
+            font-size: 13px;
+            color: var(--ink);
+            margin-bottom: 8px;
+        }
+
+        .seg-pts {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .seg-pts li {
+            font-size: 12px;
+            color: var(--ink2);
+            padding-left: 14px;
+            position: relative;
+        }
+
+        .seg-pts li::before {
+            content: '·';
+            position: absolute;
+            left: 4px;
+            color: var(--tm);
+        }
+
+        /* speaker card */
+        .spk {
+            border: 1px solid var(--rule);
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 10px;
+        }
+
+        .spk-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .spk-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .spk-row {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .spk-lbl {
+            font-size: 10px;
+            color: var(--ink3);
+        }
+
+        .spk-val {
+            font-size: 12px;
+            color: var(--ink2);
+        }
+
+        .pill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        /* word bar */
+        .wbar-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .wbar-name {
+            font-size: 12px;
+            width: 150px;
+            flex-shrink: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .wbar-track {
+            flex: 1;
+            height: 7px;
+            background: var(--rule);
+            border-radius: 4px;
+        }
+
+        .wbar-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: var(--tm);
+            transition: width .4s ease;
+        }
+
+        .wbar-val {
+            font-size: 11px;
+            color: var(--ink3);
+            width: 44px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        /* summary prose */
+        .prose {
+            font-size: 13px;
+            color: var(--ink2);
+            line-height: 1.7;
+            padding: 16px 20px;
+        }
+
+        .takeaway {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .takeaway:last-child {
+            border-bottom: none;
+        }
+
+        .takeaway-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--tm);
+            flex-shrink: 0;
+            margin-top: 6px;
+        }
+
+        /* scores grid */
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .score-cell {
+            background: var(--paper);
+            border: 1px solid var(--rule);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .score-cell .sv {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .score-cell .sl {
+            font-size: 10px;
+            color: var(--ink3);
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+        /* risk / insight item */
+        .risk-item {
+            padding: 8px 12px;
+            border-left: 3px solid var(--cc);
+            background: color-mix(in srgb, var(--cc) 6%, transparent);
+            border-radius: 0 6px 6px 0;
+            margin-bottom: 6px;
+            font-size: 12px;
+            color: var(--ink2);
+        }
+
+        .insight-item {
+            padding: 8px 12px;
+            border-left: 3px solid var(--tc);
+            background: color-mix(in srgb, var(--tc) 6%, transparent);
+            border-radius: 0 6px 6px 0;
+            margin-bottom: 6px;
+            font-size: 12px;
+            color: var(--ink2);
+        }
+
+        .q-item {
+            padding: 10px 14px;
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            margin-bottom: 6px;
+        }
+
+        .q-text {
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .q-meta {
+            font-size: 11px;
+            color: var(--ink3);
+        }
+    </style>
+    <style id="captions-styles">
+        .cap-row {
+            display: grid;
+            grid-template-columns: 44px 160px 1fr;
+            gap: 10px;
+            align-items: baseline;
+            padding: 5px 8px;
+            border-radius: 5px;
+            transition: background .1s;
+        }
+
+        .cap-row:hover {
+            background: color-mix(in srgb, var(--tm) 5%, transparent);
+        }
+
+        .cap-ts {
+            font-size: 10px;
+            color: var(--ink3);
+            font-family: monospace;
+            flex-shrink: 0;
+        }
+
+        .cap-spk {
+            font-size: 11px;
+            font-weight: 600;
+            flex-shrink: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .cap-txt {
+            font-size: 13px;
+            color: var(--ink);
+            line-height: 1.5;
+        }
+
+        #dinp {
+            font-family: var(--fd);
+            font-size: 13px;
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            background: var(--paper);
+            color: var(--ink);
+            width: 185px;
+            max-height: 120px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--rule) transparent;
+            padding: 2px 0;
+            box-sizing: border-box;
+            cursor: default;
+        }
+
+        #dinp .dopt {
+            padding: 2px 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.8;
+            user-select: none;
+        }
+
+        #dinp .dopt:hover {
+            background: Highlight;
+            color: HighlightText;
+            opacity: 0.75;
+        }
+
+        #dinp .dopt.selected {
+            background: Highlight;
+            color: HighlightText;
+            opacity: 1;
+        }
+
+        .modal-cp {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-cp.hidden {
+            display: none;
+        }
+
+        .modal-box {
+            background: white;
+            color: #000;
+            padding: 16px 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            min-width: 260px;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        /* Control bar container */
+        .table-controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 14px;
+            background: var(--rule);
+            border: 1px solid #e3e6ea;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            color: #fff;
+        }
+
+        /* Individual control groups */
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 140px;
+        }
+
+        /* Labels */
+        .control-group label {
+            font-weight: 500;
+            font-size: 11px;
+            margin-bottom: 4px;
+            color: #fff;
+        }
+
+        /* Inputs & selects */
+        .control-group input,
+        .control-group select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            font-size: 13px;
+            background: var(--rule);
+            transition: all 0.2s ease;
+        }
+
+        .control-group input:focus,
+        .control-group select:focus {
+            outline: none;
+            border-color: #6c9cff;
+            box-shadow: 0 0 0 2px rgba(108, 156, 255, 0.2);
+        }
+
+        /* Search input icon */
+        #search {
+            background: url('data:image/svg+xml;utf8,<svg fill="%239aa4b2" height="16" viewBox="0 0 24 24" width="16"><path d="M21 20l-5.6-5.6a7 7 0 10-1 1L20 21zM4 11a7 7 0 1114 0A7 7 0 014 11z"/></svg>') no-repeat 10px center;
+            background-size: 14px;
+            padding-left: 32px;
+        }
+
+        /* Result info */
+        .results-info {
+            margin-left: auto;
+            font-size: 12px;
+            color: #fff;
+        }
+
+        #dfilter,
+        #summaryFilter,
+        #limit {
+            color: #fff;
+        }
+
+        .sort-header>tr>th {
+            cursor: pointer;
+        }
+
+        /* Pagination buttons */
+        .pagination {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+            color: #fff;
+        }
+
+        .pagination>button {
+
+            color: #fff;
+        }
+
+        .pagination button {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #e3e6ea;
+            background: var(--rule);
+            ;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.15s ease;
+        }
+
+        .pagination button:hover {
+            background: #f1f4f8;
+        }
+
+        .pagination button.active {
+            background: #6c9cff;
+            color: #fff;
+            border-color: #6c9cff;
+        }
+
+        .summary-caption {
+            padding: 5px 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+
+        <!-- topbar -->
+        <header class="topbar">
+            <div class="wordmark">Chrono<em>Flow</em></div>
+            <div class="vdiv"></div>
+            <div class="topbar-sub">Meeting intelligence</div>
+            <div class="topbar-r">
+                <div class="api-pill"><span class="dot"></span> API online</div>
+                <div class="clock" id="clk">—</div>
+            </div>
+        </header>
+
+        <!-- sidebar -->
+        <nav class="sidebar">
+            <span class="ns">Overview</span>
+            <div class="nl on" onclick="nav('dash',this)">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+                    <rect x="1" y="1" width="6" height="6" rx="1" />
+                    <rect x="9" y="1" width="6" height="6" rx="1" />
+                    <rect x="1" y="9" width="6" height="6" rx="1" />
+                    <rect x="9" y="9" width="6" height="6" rx="1" />
+                </svg>
+                Dashboard
+            </div>
+            <span class="ns">Meetings</span>
+            <div class="nl" onclick="nav('meetings',this)">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+                    <path d="M2 4h12M2 8h8M2 12h10" />
+                </svg>
+                All meetings
+            </div>
+            <div class="nl" onclick="nav('raw',this)">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+                    <rect x="2" y="1" width="10" height="13" rx="1" />
+                    <path d="M5 5h5M5 8h3" />
+                    <path d="M10 1v4h4" />
+                </svg>
+                Raw files
+                <span class="nbadge" id="rbadge">—</span>
+            </div>
+            <span class="ns">Pipeline</span>
+            <div class="nl" onclick="nav('pipe',this)">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+                    <circle cx="8" cy="8" r="3" />
+                    <path d="M8 1v2M8 13v2M1 8h2M13 8h2" />
+                </svg>
+                Run pipeline
+            </div>
+            <div class="nl" onclick="nav('jobs',this)">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+                    <path d="M3 4h10M5 8h8M3 12h6" />
+                    <circle cx="2" cy="4" r="1" fill="currentColor" stroke="none" />
+                    <circle cx="4" cy="8" r="1" fill="currentColor" stroke="none" />
+                    <circle cx="2" cy="12" r="1" fill="currentColor" stroke="none" />
+                </svg>
+                Job history
+            </div>
+        </nav>
+
+        <!-- main -->
+        <main class="main">
+
+            <!-- dashboard -->
+            <div class="view on" id="v-dash">
+                <div class="ph">
+                    <div>
+                        <div class="pt" id="greeting">Good morning, <em>ChronoFlow</em></div>
+                        <div class="pm" id="last-up">Loading…</div>
+                    </div>
+                    <button class="btn" onclick="boot()">↻ Refresh</button>
+                </div>
+
+                <div class="strip">
+                    <div class="sc">
+                        <div class="sl">Meetings</div>
+                        <div class="sv" id="s0">—</div>
+                        <div class="ss">organized</div>
+                    </div>
+                    <div class="sc">
+                        <div class="sl">Effectiveness</div>
+                        <div class="sv t" id="s1">—</div>
+                        <div class="ss">avg / 10</div>
+                    </div>
+                    <div class="sc">
+                        <div class="sl">Meeting days</div>
+                        <div class="sv" id="s2">—</div>
+                        <div class="ss">unique dates</div>
+                    </div>
+                    <div class="sc">
+                        <div class="sl">Raw files</div>
+                        <div class="sv a" id="s3">—</div>
+                        <div class="ss">data/raw</div>
+                    </div>
+                    <div class="sc">
+                        <div class="sl">Unorganized</div>
+                        <div class="sv c" id="s4">—</div>
+                        <div class="ss">pending</div>
+                    </div>
+                    <div class="sc">
+                        <div class="sl">No summary</div>
+                        <div class="sv c" id="s5">—</div>
+                        <div class="ss">need LLM run</div>
+                    </div>
+                </div>
+
+                <div class="tc2">
+                    <div class="card">
+                        <div class="ch">
+                            <div class="ct">Participants</div>
+                        </div>
+                        <div id="pb">
+                            <div style="padding:20px"><span class="spin"></span></div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="ch">
+                            <div class="ct">Activity by date</div>
+                        </div>
+                        <div id="db">
+                            <div style="padding:20px"><span class="spin"></span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="ch">
+                        <div class="ct">Recent meetings</div>
+                        <button class="ca" onclick="nav('meetings',document.querySelectorAll('.nl')[1])">See all
+                            →</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Date</th>
+                                <th>Theme</th>
+                                <th>Participants</th>
+                                <th>Score</th>
+                                <th>Summary</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rtb">
+                            <tr>
+                                <td colspan="6" class="muted"><span class="spin"></span> Loading…</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- meetings -->
+            <div class="view" id="v-meetings">
+                <div class="ph">
+                    <div>
+                        <div class="pt">All <em>meetings</em></div>
+                        <div class="pm">Organized recordings and summaries</div>
+                    </div>
+                    <div class="bg">
+                        <select id="dfilter" onchange="fmtgs()"
+                            style="font-family:var(--fd);font-size:12px;padding:8px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);">
+                            <option value="">All dates</option>
+                        </select>
+                        <button class="btn" onclick="loadMeetings()">↻ Refresh</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="table-controls">
+                        <!-- Search with icon -->
+                        <div class="control-group">
+                            <label for="search">Search</label>
+                            <input id="search" type="text" placeholder="Search ID or Date" />
+                        </div>
+
+                        <!-- Date filter pill-style -->
+                        <div class="control-group">
+                            <label for="dfilter">Date</label>
+                            <select id="dfilter-dates">
+                                <option value="">All Dates</option>
+                            </select>
+                        </div>
+
+                        <!-- Summary filter pill-style -->
+                        <div class="control-group">
+                            <label for="summaryFilter">Summary</label>
+                            <select id="summaryFilter">
+                                <option value="">All</option>
+                                <option value="true">Has Summary</option>
+                                <option value="false">No Summary</option>
+                            </select>
+                        </div>
+
+                        <!-- Limit selector -->
+                        <div class="control-group">
+                            <label for="limit">Show</label>
+                            <select id="limit">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="20">20</option>
+                            </select>
+                        </div>
+
+                        <!-- Result info -->
+                        <div id="resultsInfo" class="results-info">Loading…</div>
+                    </div>
+                    <table>
+                        <thead class="sort-header">
+                            <tr>
+                                <th onclick="sortBy('meeting_id')">ID</th>
+                                <th onclick="sortBy('date')">Date</th>
+                                <th onclick="sortBy('primary_theme')">Theme</th>
+                                <th>Participants</th>
+                                <th onclick="sortBy('duration')">Score</th>
+                                <th>Files</th>
+                                <th>Summary</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mtb">
+                            <tr>
+                                <td colspan="7" class="muted"><span class="spin"></span> Loading…</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div id="pagination" class="pagination"></div>
+                </div>
+            </div>
+
+            <!-- raw -->
+            <div class="view" id="v-raw">
+                <div class="ph">
+                    <div>
+                        <div class="pt"><em>Raw</em> files</div>
+                        <div class="pm">Unprocessed files in data/raw</div>
+                    </div>
+                    <button class="btn btn-k" onclick="organizeRawFiles()">↓ Organize now</button>
+                </div>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Filename</th>
+                                <th>Type</th>
+                                <th>Size</th>
+                                <th>Modified</th>
+                                <th>Meeting ID</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ratb">
+                            <tr>
+                                <td colspan="5" class="muted"><span class="spin"></span> Loading…</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- pipeline -->
+            <div class="view" id="v-pipe">
+                <div class="ph">
+                    <div>
+                        <div class="pt">Run <em>pipeline</em></div>
+                        <div class="pm">Trigger file organization and LLM summarization</div>
+                    </div>
+                </div>
+
+                <div class="pc">
+                    <div class="pn">01</div>
+                    <div class="pi" style="flex:1">
+                        <h3>Organize files</h3>
+                        <p>runner.py — sorts raw files into dated folders by timestamp and type</p>
+                    </div>
+                    <button class="btn btn-t" onclick="run('organize')">Run organize</button>
+                </div>
+
+                <div class="pc">
+                    <div class="pn">02</div>
+                    <div class="pi" style="flex:1">
+                        <h3>Generate summaries</h3>
+                        <p>llm_runner.py — analyzes captions and transcripts, produces meeting intelligence JSON</p>
+                    </div>
+                    <div class="bg">
+                        <div style="position:relative;width:185px;">
+                            <div id="dinp-trigger" onclick="toggleDinp()" style="
+                                font-family: var(--fd);
+                                font-size: 12px;
+                                padding: 5px 8px;
+                                border: 1px solid var(--rule);
+                                border-radius: 6px;
+                                background: var(--paper);
+                                color: var(--ink);
+                                cursor: default;
+                                display: flex;
+                                align-items: center;
+                                justify-content: space-between;
+                                user-select: none;
+                                height: 32px;
+                                box-sizing: border-box;
+                            ">
+                                <span id="dinp-label"
+                                    style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;color:var(--ink3)">Select
+                                    transcript…</span>
+                                <span style="font-size:9px;color:var(--ink3);margin-left:6px">▾</span>
+                            </div>
+                            <div id="dinp" style="
+                                display: none;
+                                position: absolute;
+                                top: 100%;
+                                left: 0;
+                                right: 0;
+                                z-index: 999;
+                                background: var(--paper);
+                                border: 1px solid var(--rule);
+                                border-top: none;
+                                border-radius: 0 0 6px 6px;
+                                max-height: 160px;
+                                overflow-y: auto;
+                                scrollbar-width: thin;
+                                scrollbar-color: var(--rule) transparent;
+                                box-sizing: border-box;
+                                padding: 2px 0;
+                            "></div>
+                        </div>
+                        <button class="btn btn-t" onclick="run('summarize')">Run summarize</button>
+                    </div>
+                </div>
+
+                <div class="pc" style="border-color:var(--ink);">
+                    <div class="pn" style="color:var(--ink2)">→</div>
+                    <div class="pi" style="flex:1">
+                        <h3>Full pipeline</h3>
+                        <p>Organize then summarize sequentially — end-to-end from raw files to meeting intelligence</p>
+                    </div>
+                    <button class="btn btn-k" onclick="run('full')">Run full pipeline</button>
+                </div>
+
+                <div id="jpanel" style="display:none">
+                    <div class="card">
+                        <div class="ch">
+                            <div class="ct" id="jtitle">Running…</div>
+                            <span class="tag a" id="jtag">running</span>
+                        </div>
+                        <div style="padding:10px 20px 0">
+                            <div class="bg" id="jmeta"></div>
+                        </div>
+                        <div class="term" id="jterm">Waiting…</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- jobs -->
+            <div class="view" id="v-jobs">
+                <div class="ph">
+                    <div>
+                        <div class="pt">Job <em>history</em></div>
+                        <div class="pm">Pipeline runs this session — resets on server restart</div>
+                    </div>
+                    <button class="btn" onclick="loadJobs()">↻ Refresh</button>
+                </div>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Job ID</th>
+                                <th>Mode</th>
+                                <th>Status</th>
+                                <th>Started</th>
+                                <th>Finished</th>
+                                <th>Files</th>
+                            </tr>
+                        </thead>
+                        <tbody id="jtb">
+                            <tr>
+                                <td colspan="6" class="muted">No jobs this session</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="view" id="v-meeting-detail">
+
+                <!-- page header -->
+                <div class="ph">
+                    <div style="display:flex;align-items:center;gap:12px">
+                        <button class="btn" onclick="backFromDetail()" style="display:flex;align-items:center;gap:6px">
+                            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" width="13"
+                                height="13">
+                                <path d="M10 3L5 8l5 5" />
+                            </svg>
+                            Back
+                        </button>
+                        <div>
+                            <div class="pt" id="det-title">Meeting <em>detail</em></div>
+                            <div class="pm" id="det-sub">—</div>
+                        </div>
+                    </div>
+                    <div class="bg" style="gap:8px">
+                        <span class="tag b" id="det-type-tag">—</span>
+                        <span class="tag b" id="det-status-tag">—</span>
+                    </div>
+                </div>
+
+                <!-- loading -->
+                <div id="det-loading" style="padding:64px;text-align:center;color:var(--ink3)">
+                    <span class="spin"></span> Loading meeting…
+                </div>
+
+                <!-- content -->
+                <div id="det-content" style="display:none">
+
+                    <!-- stat strip -->
+                    <div class="strip" id="det-strip" style="margin-bottom:20px"></div>
+
+                    <!-- media player (outside tabs, always visible if present) -->
+                    <div class="card" id="det-media-card" style="display:none;margin-bottom:16px">
+                        <div class="ch">
+                            <div class="ct" id="det-media-title">Recording</div>
+                            <span class="tag b" id="det-media-tag">webm</span>
+                        </div>
+                        <div style="padding:16px 20px">
+                            <video id="det-video"
+                                style="display:none;width:100%;border-radius:6px;background:#000;max-height:240px"
+                                controls preload="metadata"></video>
+                            <div id="det-audio-wrap" style="display:none">
+                                <div
+                                    style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--paper);border:1px solid var(--rule);border-radius:8px">
+                                    <div
+                                        style="width:40px;height:40px;border-radius:50%;background:var(--tm);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                        <svg viewBox="0 0 16 16" fill="white" width="16" height="16">
+                                            <path d="M8 1a3 3 0 0 1 3 3v4a3 3 0 0 1-6 0V4a3 3 0 0 1 3-3z" />
+                                            <path d="M3 8a5 5 0 0 0 10 0" stroke="white" fill="none"
+                                                stroke-width="1.2" />
+                                            <line x1="8" y1="13" x2="8" y2="15" stroke="white" stroke-width="1.2" />
+                                        </svg>
+                                    </div>
+                                    <div style="flex:1;min-width:0">
+                                        <div style="font-size:12px;color:var(--ink2);margin-bottom:6px"
+                                            id="det-audio-label">Audio
+                                            recording</div>
+                                        <audio id="det-audio" style="width:100%;height:28px" controls
+                                            preload="metadata"></audio>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="margin-top:8px;font-size:11px;color:var(--ink3)" id="det-media-meta"></div>
+                        </div>
+                    </div>
+
+                    <!-- tabs -->
+                    <div class="card" style="padding:0;overflow:hidden">
+                        <div class="tabs">
+                            <div class="tab on" onclick="switchTab('overview',this)">Overview</div>
+                            <div class="tab" onclick="switchTab('analysis',this)">Analysis</div>
+                            <div class="tab" onclick="switchTab('participants',this)">Participants</div>
+                            <div class="tab" onclick="switchTab('summary',this)">Summary</div>
+                            <div class="tab" onclick="switchTab('captions',this)">Captions</div>
+                        </div>
+
+                        <!-- ── TAB: Overview ── -->
+                        <div class="tab-panel on" id="tp-overview">
+                            <div
+                                style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:1px solid var(--rule)">
+
+                                <!-- left: meeting info -->
+                                <div style="padding:20px;border-right:1px solid var(--rule)">
+                                    <div
+                                        style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px">
+                                        Meeting info</div>
+                                    <div id="det-kv-info"></div>
+                                </div>
+
+                                <!-- right: theme + health -->
+                                <div style="padding:20px">
+                                    <div
+                                        style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px">
+                                        Theme & health</div>
+                                    <div id="det-kv-theme"></div>
+                                </div>
+                            </div>
+
+                            <!-- discussion flow segments -->
+                            <div style="padding:20px">
+                                <div
+                                    style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px">
+                                    Discussion flow</div>
+                                <div id="det-segments"></div>
+                            </div>
+
+                            <!-- files -->
+                            <div style="padding:0 20px 20px">
+                                <div
+                                    style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px">
+                                    File inventory <span class="tag b" id="det-file-count"
+                                        style="margin-left:6px">—</span></div>
+                                <div id="det-files" style="display:flex;flex-direction:column;gap:6px"></div>
+                            </div>
+                        </div>
+
+                        <!-- ── TAB: Analysis ── -->
+                        <div class="tab-panel" id="tp-analysis">
+
+                            <!-- communication quality scores -->
+                            <div style="padding:20px;border-bottom:1px solid var(--rule)">
+                                <div
+                                    style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px">
+                                    Communication quality</div>
+                                <div class="score-grid" id="det-comm-scores"></div>
+                                <div id="det-comm-hindrances"></div>
+                            </div>
+
+                            <!-- word participation bars -->
+                            <div style="padding:20px;border-bottom:1px solid var(--rule)">
+                                <div
+                                    style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px">
+                                    Speaking volume</div>
+                                <div id="det-wordbars"></div>
+                                <div style="margin-top:10px;display:flex;gap:16px;flex-wrap:wrap" id="det-part-meta">
+                                </div>
+                            </div>
+
+                            <!-- key content -->
+                            <div style="padding:20px;border-bottom:1px solid var(--rule)">
+                                <div
+                                    style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px">
+                                    Key content</div>
+                                <div id="det-key-content"></div>
+                            </div>
+
+                            <!-- questions -->
+                            <div style="padding:20px;border-bottom:1px solid var(--rule)">
+                                <div
+                                    style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px">
+                                    Questions raised</div>
+                                <div id="det-questions"></div>
+                            </div>
+
+                            <!-- gaps & risks -->
+                            <div style="padding:20px;border-bottom:1px solid var(--rule)">
+                                <div
+                                    style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px">
+                                    Gaps & risks</div>
+                                <div id="det-risks"></div>
+                            </div>
+
+                            <!-- actionable insights -->
+                            <div style="padding:20px">
+                                <div
+                                    style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px">
+                                    Actionable insights</div>
+                                <div id="det-insights"></div>
+                            </div>
+                        </div>
+
+                        <!-- ── TAB: Participants ── -->
+                        <div class="tab-panel" id="tp-participants">
+
+                            <!-- score comparison bars -->
+                            <div style="padding:20px;border-bottom:1px solid var(--rule)">
+                                <div
+                                    style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px">
+                                    Score comparison</div>
+                                <div id="det-score-bars"></div>
+                            </div>
+
+                            <!-- per-participant detailed cards -->
+                            <div style="padding:20px">
+                                <div
+                                    style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px">
+                                    Individual breakdown</div>
+                                <div id="det-spk-cards"></div>
+                            </div>
+                        </div>
+
+                        <!-- ── TAB: Summary ── -->
+                        <div class="tab-panel" id="tp-summary">
+
+                            <!-- effectiveness scores -->
+                            <div style="padding:20px;border-bottom:1px solid var(--rule)">
+                                <div class="score-grid" id="det-eff-scores"></div>
+                            </div>
+
+                            <!-- prose summary -->
+                            <div style="padding:20px;border-bottom:1px solid var(--rule)">
+                                <div
+                                    style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px">
+                                    Meeting summary</div>
+                                <div class="prose" id="det-prose" style="padding:0"></div>
+                            </div>
+
+                            <!-- key takeaways -->
+                            <div style="padding:20px;border-bottom:1px solid var(--rule)">
+                                <div
+                                    style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px">
+                                    Key takeaways</div>
+                                <div id="det-takeaways"></div>
+                            </div>
+
+                            <!-- action items -->
+                            <div style="padding:20px;border-bottom:1px solid var(--rule)">
+                                <div
+                                    style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px">
+                                    Action items</div>
+                                <div id="det-actions"></div>
+                            </div>
+
+                            <!-- highlights -->
+                            <div style="padding:20px;border-bottom:1px solid var(--rule)">
+                                <div
+                                    style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px">
+                                    Highlights & notables</div>
+                                <div id="det-highlights"></div>
+                            </div>
+
+                            <!-- raw JSON toggle -->
+                            <div style="padding:20px">
+                                <div
+                                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                                    <div
+                                        style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)">
+                                        Raw JSON</div>
+                                    <button class="ca" onclick="toggleRaw()">Toggle</button>
+                                </div>
+                                <div id="det-raw-wrap" style="display:none">
+                                    <pre id="det-raw"
+                                        style="font-size:11px;color:var(--ink2);overflow:auto;max-height:360px;margin:0;white-space:pre-wrap;word-break:break-all;background:var(--paper);padding:14px;border-radius:6px;border:1px solid var(--rule)"></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── TAB: Captions ── -->
+                        <div class="tab-panel" id="tp-captions">
+
+                            <!-- duration bar -->
+                            <div id="det-cap-header"
+                                style="display:none;padding:16px 20px;border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+                                <div class="sc" style="margin:0;min-width:120px">
+                                    <div class="sl">Duration</div>
+                                    <div class="sv" id="det-cap-duration">—</div>
+                                    <div class="ss">from captions</div>
+                                </div>
+                                <div class="sc" style="margin:0;min-width:120px">
+                                    <div class="sl">Turns</div>
+                                    <div class="sv" id="det-cap-turns">—</div>
+                                    <div class="ss">total</div>
+                                </div>
+                                <div class="sc" style="margin:0;min-width:120px">
+                                    <div class="sl">Speakers</div>
+                                    <div class="sv" id="det-cap-speakers">—</div>
+                                    <div class="ss">unique</div>
+                                </div>
+                                <div style="margin-left:auto">
+                                    <input id="det-cap-search" type="text" placeholder="Search captions…"
+                                        oninput="filterCaptions(this.value)"
+                                        style="font-family:var(--fd);font-size:12px;padding:7px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:200px" />
+                                </div>
+                            </div>
+
+                            <!-- loading -->
+                            <div id="det-cap-loading" style="padding:48px;text-align:center;color:var(--ink3)">
+                                <span class="spin"></span> Loading captions…
+                            </div>
+
+                            <!-- empty state -->
+                            <div id="det-cap-empty"
+                                style="display:none;padding:48px;text-align:center;color:var(--ink3)">
+                                No captions file found for this meeting
+                            </div>
+
+                            <!-- captions list -->
+                            <div id="det-cap-list"
+                                style="display:none;padding:16px 20px;display:none;flex-direction:column;gap:2px;max-height:600px;overflow-y:auto">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- modal -->
+    <div class="ov" id="ov" onclick="maybeClose(event)">
+        <div class="modal">
+            <div class="mt">
+                <div>
+                    <div class="mh" id="mh">—</div>
+                    <div class="md" id="md">—</div>
+                </div>
+                <button class="mc" onclick="closeModal()">✕</button>
+            </div>
+            <div class="mb" id="mbody"></div>
+        </div>
+    </div>
+    <div id="confirm-modal" class="modal-cp hidden">
+        <div class="modal-box">
+            <p class="summary-modal-content">Generate summary for this item?</p>
+            <div class="actions">
+                <button id="confirm-yes" style="color:#fff" class="btn btn-t">Yes</button>
+                <button id="confirm-no" class="btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <div class="toasts" id="toasts"></div>
+
+    <script>
+        const $ = id => document.getElementById(id);
+        let _all = [], _poll = null;
+        // track where the user came from so Back works correctly
+        let _detailOrigin = 'meetings';
+
+        let pendingId = null;
+
+        const modal = document.getElementById('confirm-modal');
+        const yesBtn = document.getElementById('confirm-yes');
+        const noBtn = document.getElementById('confirm-no');
+        let _captionsData = [];   // full list, used for filtering
+        let _alltransriptsFiles = [];
+        function toggleDinp() {
+            const d = $('dinp');
+            const trigger = $('dinp-trigger');
+            const open = d.style.display === 'block';
+            d.style.display = open ? 'none' : 'block';
+            trigger.style.borderRadius = open ? '6px' : '6px 6px 0 0';
+            trigger.style.borderBottom = open ? '' : '1px solid var(--rule2)';
+        }
+
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#dinp') && !e.target.closest('#dinp-trigger')) {
+                $('dinp').style.display = 'none';
+                $('dinp-trigger').style.borderRadius = '6px';
+                $('dinp-trigger').style.borderBottom = '';
+            }
+        });
+
+        function updateDinpLabel() {
+            const selected = $('dinp').querySelectorAll('.dopt.selected');
+            const label = $('dinp-label');
+            if (!selected.length) {
+                label.textContent = 'Select transcript…';
+                label.style.color = 'var(--ink3)';
+            } else if (selected.length === 1) {
+                label.textContent = selected[0].textContent.trim();
+                label.style.color = 'var(--ink)';
+            } else {
+                label.textContent = `${selected.length} selected`;
+                label.style.color = 'var(--ink)';
+            }
+        }
+
+        function fmtDuration(ms) {
+            if (!ms || ms <= 0) return '—';
+            const totalSec = Math.floor(ms / 1000);
+            const h = Math.floor(totalSec / 3600);
+            const m = Math.floor((totalSec % 3600) / 60);
+            const s = totalSec % 60;
+            if (h > 0) return `${h}h ${m}m ${s}s`;
+            if (m > 0) return `${m}m ${s}s`;
+            return `${s}s`;
+        }
+
+        function fmtRelTime(ms) {
+            // relative timestamp from start of meeting
+            const totalSec = Math.floor(ms / 1000);
+            const m = Math.floor(totalSec / 60);
+            const s = totalSec % 60;
+            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
+        // speaker colour cycling — consistent per name
+        const _spkColours = ['var(--tm)', 'var(--tc)', 'var(--ac)', 'var(--cc)', '#8b8ff8', '#f87c6d', '#4ecdc4', '#ffe66d'];
+        const _spkMap = {};
+        let _spkIdx = 0;
+        function spkColour(name) {
+            if (!name) return 'var(--ink3)';
+            if (!_spkMap[name]) _spkMap[name] = _spkColours[_spkIdx++ % _spkColours.length];
+            return _spkMap[name];
+        }
+
+        function renderCaptionRow(c, offsetMs) {
+            console.log("...captionData", c, offsetMs)
+            const relMs = (c?.ts ?? 0) - offsetMs;
+            const relStr = fmtRelTime(relMs > 0 ? relMs : 0);
+            const name = c?.speaker?.trim() || '';
+            const colour = spkColour(name || null);
+            const text = c?.text?.trim() || '';
+            if (!text) return '';          // skip empty turns
+
+            return `
+            <div class="cap-row" data-text="${text.toLowerCase()} ${name.toLowerCase()}">
+                <span class="cap-ts">${relStr}</span>
+                <span class="cap-spk" style="color:${colour}">${name || '<span style="opacity:.4">—</span>'}</span>
+                <span class="cap-txt">${text}</span>
+            </div>`;
+        }
+
+        function filterCaptions(query) {
+            const q = query?.toLowerCase() ?? '';
+            document.querySelectorAll('#det-cap-list .cap-row').forEach(row => {
+                const match = !q || (row.dataset?.text ?? '').includes(q);
+                row.style.display = match ? '' : 'none';
+            });
+        }
+
+        async function loadCaptions(meetingId, date) {
+            // reset state
+            Object.keys(_spkMap).forEach(k => delete _spkMap[k]);
+            _spkIdx = 0;
+            _captionsData = [];
+
+            const headerEl = document.getElementById('det-cap-header');
+            const loadingEl = document.getElementById('det-cap-loading');
+            const emptyEl = document.getElementById('det-cap-empty');
+            const listEl = document.getElementById('det-cap-list');
+
+            if (headerEl) headerEl.style.display = 'none';
+            if (loadingEl) loadingEl.style.display = 'block';
+            if (emptyEl) emptyEl.style.display = 'none';
+            if (listEl) listEl.style.display = 'none';
+
+            try {
+                const d = await GET(`/api/meetings/${date}/${meetingId}/captions`);
+                const captions = d?.captions ?? [];
+
+                if (!captions.length) {
+                    if (loadingEl) loadingEl.style.display = 'none';
+                    if (emptyEl) emptyEl.style.display = 'block';
+                    return;
+                }
+
+                _captionsData = captions;
+
+                // ── duration calc ──
+                const timestamps = captions.map(c => c?.ts).filter(t => t != null);
+                const firstTs = Math.min(...timestamps);
+                const lastTs = Math.max(...timestamps);
+                const durationMs = lastTs - firstTs;
+
+                // unique speakers
+                const uniqueSpk = new Set(captions.map(c => c?.speaker?.trim()).filter(Boolean));
+
+                // stats
+                const durEl = document.getElementById('det-cap-duration');
+                const trnEl = document.getElementById('det-cap-turns');
+                const spkEl = document.getElementById('det-cap-speakers');
+                const srchEl = document.getElementById('det-cap-search');
+
+                if (durEl) durEl.textContent = fmtDuration(durationMs);
+                if (trnEl) trnEl.textContent = captions.length;
+                if (spkEl) spkEl.textContent = uniqueSpk.size;
+                if (srchEl) srchEl.value = '';
+
+                // ── render rows ──
+                if (listEl) {
+                    listEl.innerHTML = captions.map(c => renderCaptionRow(c, firstTs)).join('');
+                    listEl.style.display = 'flex';
+                }
+
+                if (headerEl) headerEl.style.display = 'flex';
+                if (loadingEl) loadingEl.style.display = 'none';
+
+            } catch (e) {
+                if (loadingEl) loadingEl.innerHTML = `<div style="color:var(--cc)">Could not load captions: ${e?.message ?? 'unknown error'}</div>`;
+            }
+        }
+
+        function switchTab(name, el) {
+            document.querySelectorAll('#v-meeting-detail .tab').forEach(t => t.classList.remove('on'));
+            document.querySelectorAll('#v-meeting-detail .tab-panel').forEach(p => p.classList.remove('on'));
+            el.classList.add('on');
+            document.getElementById('tp-' + name).classList.add('on');
+            // lazy-load captions only when tab is first opened
+            // if (name === 'captions' && !_captionsData.length) {
+            if (name === 'captions') {
+                const titleEl = document.getElementById('det-title');
+                const subEl = document.getElementById('det-sub');
+                const id = titleEl?.textContent?.replace('Meeting ', '')?.trim() ?? '';
+                const date = subEl?.textContent?.trim() ?? '';
+                if (id && date) loadCaptions(id, date);
+            }
+        }
+
+        function backFromDetail() {
+            const idx = _detailOrigin === 'dash' ? 0 : 1;
+            nav(_detailOrigin, document.querySelectorAll('.nl')[idx]);
+        }
+
+        function toggleRaw() {
+            const w = document.getElementById('det-raw-wrap');
+            w.style.display = w.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function none(v) { return v == null || v === '' || (Array.isArray(v) && !v.length); }
+        function dash(v) { return none(v) ? '<span class="muted">—</span>' : v; }
+        function tags(arr, cls) { return arr.map(x => `<span class="tag ${cls}" style="margin:1px 2px">${x}</span>`).join(''); }
+        function ul(arr, cls) {
+            if (!arr || !arr.length) return '<span class="muted">—</span>';
+            return arr.map(x => `<div class="${cls}">${x}</div>`).join('');
+        }
+
+
+        // clock
+        setInterval(() => $('clk').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }), 1000);
+
+        // utils
+        const fmt = d => d ? new Date(d).toLocaleString() : '—';
+        const fmtS = b => b < 1024 ? b + 'B' : b < 1048576 ? (b / 1024).toFixed(1) + 'KB' : (b / 1048576).toFixed(1) + 'MB';
+        const ini = n => n.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+
+        function toast(msg, t = 'i') {
+            const col = { i: 'var(--tm)', s: 'var(--tc)', e: 'var(--cc)', w: 'var(--ac)' };
+            const ico = { i: '◆', s: '✓', e: '✕', w: '!' };
+            const el = document.createElement('div'); el.className = 'toast';
+            el.innerHTML = `<span style="color:${col[t]};font-size:14px">${ico[t]}</span>${msg}`;
+            $('toasts').appendChild(el); setTimeout(() => el.remove(), 4000);
+        }
+
+        async function GET(p) { const r = await fetch(p); if (!r.ok) throw new Error(r.statusText); return r.json(); }
+        async function POST(p, b) { const r = await fetch(p, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) }); if (!r.ok) throw new Error(r.statusText); return r.json(); }
+
+        // nav
+        function nav(v, el) {
+            location.hash = v;  // ← add this line at the top
+            document.querySelectorAll('.view').forEach(x => x.classList.remove('on'));
+            document.querySelectorAll('.nl').forEach(x => x.classList.remove('on'));
+            $('v-' + v).classList.add('on'); if (el) el.classList.add('on');
+            if (v === 'meetings') loadMeetings();
+            if (v === 'raw') loadRaw();
+            if (v === 'jobs') loadJobs();
+        }
+
+        // analytics
+        async function loadAnalytics() {
+            const d = await GET('/api/analytics/overview');
+            $('s0').textContent = d.total_meetings;
+            $('s1').textContent = d.avg_effectiveness || '—';
+            $('s2').textContent = d.total_dates;
+            $('s3').textContent = d.total_raw_files;
+            $('s4').textContent = d.pending_processing;
+            $('s5').textContent = d.pending_summarization;
+            $('rbadge').textContent = d.total_raw_files;
+
+            // participants
+            const pb = $('pb');
+            if (!d.top_participants.length) {
+                pb.innerHTML = '<div style="padding:24px 20px;text-align:center;color:var(--ink3)">No data yet</div>';
+            } else {
+                pb.innerHTML = `<table><thead><tr><th>Name</th><th>Meetings</th><th>Avg score</th></tr></thead><tbody>
+                ${d.top_participants.slice(0, 7).map(p => `<tr>
+                    <td><div style="display:flex;align-items:center;gap:8px"><div class="av">${ini(p.name)}</div>${p.name}</div></td>
+                    <td class="muted">${p.meetings_attended}</td>
+                    <td><div class="sb"><div class="sbt"><div class="sbf" style="width:${Math.round((p.avg_weighted_score / 5) * 100)}%"></div></div><span class="sbv">${p.avg_weighted_score.toFixed(1)}</span></div></td>
+                </tr>`).join('')}</tbody></table>`;
+            }
+
+            // dates
+            const db = $('db');
+            const dates = Object.entries(d.meetings_by_date).sort((a, b) => b[0].localeCompare(a[0]));
+            if (!dates.length) {
+                db.innerHTML = '<div style="padding:24px 20px;text-align:center;color:var(--ink3)">No meetings yet</div>';
+            } else {
+                const mx = Math.max(...dates.map(e => e[1]));
+                db.innerHTML = `<div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px">
+                ${dates.map(([dt, c]) => `
+                    <div style="display:flex;align-items:center;gap:12px">
+                    <span style="color:var(--ink3);font-size:12px;width:86px;flex-shrink:0">${dt}</span>
+                    <div class="sbt" style="flex:1;height:5px"><div class="sbf" style="width:${Math.round((c / mx) * 100)}%"></div></div>
+                    <span style="font-size:12px;color:var(--ink2);width:14px;text-align:right">${c}</span>
+                    </div>`).join('')}</div>`;
+            }
+        }
+
+        // meetings
+        function mrow(m, cols = 6) {
+            const e = m.overall_effectiveness;
+            const ec = e >= 8 ? 'var(--tc)' : e >= 6 ? 'var(--ac)' : e ? 'var(--cc)' : 'var(--ink3)';
+            const sb = m.has_summary ? `<span class="tag t">✓ Done</span>` : `<span class="tag a">Pending</span>`;
+            let r = `<tr onclick="openToMeeting('${m.meeting_id}','${m.date}', 'meetings')">
+                <td style="font-family:monospace;font-size:11px;color:var(--ink2)">${m.meeting_id}</td>
+                <td class="muted">${m.date}</td>
+                <td>${m.primary_theme || '<span class="muted">—</span>'}</td>
+                <td><span class="tag p">${m.participants.length}</span></td>
+                <td style="font-weight:500;color:${ec}">${e ? e + '/10' : '—'}</td>`;
+            if (cols === 7) r += `<td class="muted">${m.files.length} files</td>`;
+            r += `<td>${sb}</td></tr>`;
+            return r;
+        }
+
+        async function loadRecentMeetings() {
+            const d = await GET('/api/meetings/');
+            _all = d.meetings;
+            $('rtb').innerHTML = _all.slice(0, 8).map(m => mrow(m, 6)).join('') || `<tr><td colspan="6" class="muted">No meetings found</td></tr>`;
+        }
+
+        let state = {
+            page: 1,
+            limit: 10,
+            search: '',
+            date: '',
+            has_summary: '',
+            sort_by: 'date',
+            sort_order: 'desc'
+        };
+
+        function renderPagination(total) {
+            const pages = Math.ceil(total / state.limit);
+            const container = $('pagination');
+
+            container.innerHTML = '';
+
+            for (let i = 1; i <= pages; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+
+                if (i === state.page) btn.classList.add('active');
+
+                btn.onclick = () => {
+                    state.page = i;
+                    loadMeetings(); // ✅ triggers API again
+                };
+
+                container.appendChild(btn);
+            }
+        }
+
+        $('search').oninput = (e) => {
+            state.search = e.target.value;
+            state.page = 1;
+            loadMeetings();
+        };
+
+        $('dfilter-dates').onchange = (e) => {
+            state.date = e.target.value;
+            state.page = 1;
+            loadMeetings();
+        };
+
+        $('summaryFilter').onchange = (e) => {
+            state.has_summary = e.target.value;
+            state.page = 1;
+            loadMeetings();
+        };
+
+        function sortBy(field) {
+            if (state.sort_by === field) {
+                state.sort_order = state.sort_order === 'asc' ? 'desc' : 'asc';
+            } else {
+                state.sort_by = field;
+                state.sort_order = 'asc';
+            }
+
+            loadMeetings();
+        }
+        function updateResultsInfo(total, page, limit) {
+            const start = (page - 1) * limit + 1;
+            const end = Math.min(start + limit - 1, total);
+            $('resultsInfo').textContent = `Showing ${start}–${end} of ${total} meetings`;
+        }
+        async function loadMeetings() {
+            $('mtb').innerHTML = `<tr><td colspan="7" class="muted"><span class="spin"></span> Loading…</td></tr>`;
+
+            const params = new URLSearchParams({
+                page: state.page,
+                limit: state.limit,
+                search: state.search,
+                date: state.date,
+                sort_by: state.sort_by,
+                sort_order: state.sort_order
+            });
+
+            // Only append has_summary if it’s true or false
+            if (state.has_summary === 'true' || state.has_summary === 'false') {
+                params.append('has_summary', state.has_summary);
+            }
+            const d = await GET(`/api/meetings/?${params}`);
+
+            _all = d.meetings;
+            updateResultsInfo(d.total_meetings, state.page, state.limit);
+            renderPagination(d.total_meetings);
+            fmtgs();
+        }
+
+        function fmtgs() {
+            const dt = $('dfilter').value;
+            const f = dt ? _all.filter(m => m.date === dt) : _all;
+            $('mtb').innerHTML = f.map(m => mrow(m, 7)).join('') || `<tr><td colspan="7" class="muted">No meetings</td></tr>`;
+        }
+
+        // raw
+        async function loadRaw() {
+            $('ratb').innerHTML = `<tr><td colspan="5" class="muted"><span class="spin"></span> Loading…</td></tr>`;
+            const d = await GET('/api/meetings/raw');
+            if (!d.files.length) { $('ratb').innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--ink3)">All files organized ✓</td></tr>`; return; }
+            const tc = { audio: 't', video: 'b', captions: 'a', transcript: 'p', summary: 'c' };
+            $('ratb').innerHTML = d.files.map(f => `<tr>
+                <td style="font-size:11px;font-family:monospace;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.filename}</td>
+                <td><span class="tag ${tc[f.file_type] || 'b'}">${f.file_type}</span></td>
+                <td class="muted">${fmtS(f.size_bytes)}</td>
+                <td class="muted" style="font-size:12px">${fmt(f.modified_at)}</td>
+                <td style="font-family:monospace;font-size:11px;color:var(--tc)">${f.meeting_id || '—'}</td>
+            </tr>`).join('');
+        }
+
+        async function organizeRawFiles() {
+            const panel = $('jpanel'), term = $('jterm'), title = $('jtitle'), tag = $('jtag');
+
+            // Show job panel for organizing raw files
+            panel.style.display = 'block';
+            title.textContent = 'Organize — running…';
+            tag.className = 'tag a';
+            tag.textContent = 'running';
+            term.textContent = 'Dispatching…';
+
+            try {
+                // Call a dedicated API for organizing raw files
+                const job = await POST('/api/pipeline/run', { mode: 'organize', force: true });
+                toast(`Organization job ${job.job_id} started`, 'i');
+                $('jmeta').innerHTML = `<span class="tag b">ID: ${job.job_id}</span><span class="tag p">organize</span>`;
+
+                // Poll for completion
+                const poll = setInterval(async () => {
+                    const s = await GET(`/api/pipeline/jobs/${job.job_id}`);
+                    term.textContent = s.output || s.error || '…waiting';
+                    term.scrollTop = term.scrollHeight;
+
+                    if (s.status === 'completed' || s.status === 'failed') {
+                        clearInterval(poll);
+                        const hasFailures = s.status === 'failed' || (s.output?.includes('❌'));
+                        tag.className = `tag ${hasFailures ? 'a' : 't'}`;
+                        tag.textContent = hasFailures ? 'partial' : 'completed';
+                        title.textContent = `Organize — ${hasFailures ? 'partial' : 'done'}`;
+                        toast(`Organization job ${job.job_id} ${hasFailures ? 'completed with errors' : 'completed'}`, hasFailures ? 'w' : 's');
+
+                        // Reload raw files table after completion
+                        loadRaw();
+                    }
+                }, 2000);
+
+            } catch (e) {
+                term.textContent = 'Error: ' + e.message;
+                toast('Organization failed: ' + e.message, 'e');
+            }
+        }
+
+
+        function openConfirm(id, text) {
+            pendingId = id;
+            if (text) {
+                document.querySelector(".summary-modal-content").textContent = text
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeConfirm() {
+            modal.classList.add('hidden');
+            pendingId = null;
+        }
+        if (yesBtn) {
+            yesBtn.onclick = () => {
+                if (pendingId) run('summarize', Array.isArray(pendingId) ? [...pendingId] : [pendingId]);
+                closeConfirm();
+            };
+        }
+        if (noBtn) {
+            noBtn.onclick = closeConfirm;
+        }
+
+        function renderDetail(m, id) {
+            if (document.querySelectorAll(".summary-caption")) {
+                document.querySelectorAll(".summary-caption").forEach(el => el.remove());
+            }
+            const raw = m.summary_data || {};
+            const over = raw.meeting_overview || {};
+            const part = raw.participation_analysis || {};
+            const spkQ = raw.speaker_quality || {};
+            const flow = raw.discussion_flow || {};
+            const comm = raw.communication_quality || {};
+            const keyC = raw.key_content || {};
+            const actI = raw.action_items || {};
+            const gaps = raw.gaps_risks_misalignments || {};
+            const acIns = raw.actionable_insights || {};
+            const qs = raw.questions_engagement || {};
+            const hi = raw.highlights_and_notables || {};
+            const theme = raw.meeting_theme || {};
+            const ovSum = raw.overall_summary || {};
+            const score = raw.scoring || {};
+            const exLbl = raw.meeting_type_and_executive_label || {};
+
+            // ── header tags ──
+            document.getElementById('det-type-tag').textContent =
+                theme.category || exLbl.primary_type || '—';
+
+            const stag = document.getElementById('det-status-tag');
+            const container = stag.parentElement; // ✅ safer than querySelector('.bg')
+
+            // Remove old extra tag if it exists
+            const existingLastTag = container.querySelector('.tag.c');
+            if (existingLastTag) existingLastTag.remove();
+
+            if (m.has_summary) {
+                stag.textContent = '✓ Summarized';
+
+                const lastTag = document.createElement('span');
+
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-k summary-caption';
+                btn.textContent = 'Regenerate AI Summary';
+                btn.onclick = () => openConfirm(id, `Are you sure you want to regenerate another summary ?`);
+
+                lastTag.appendChild(btn);
+                container.appendChild(lastTag);
+            } else {
+                stag.textContent = 'No summary';
+
+                const lastTag = document.createElement('span');
+
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-t summary-caption';
+                btn.textContent = 'AI Summary';
+                btn.onclick = () => openConfirm(id);
+
+                lastTag.appendChild(btn);
+                container.appendChild(lastTag);
+            }
+            stag.className = `tag ${m.has_summary ? 't' : 'a'}`;
+
+            function parseLeaders(data) {
+                if (Array.isArray(data)) {
+                    return data.join(" and ")
+                }
+                return '—';
+            }
+            // ── stat strip ──
+            const e = m.overall_effectiveness || ovSum.overall_effectiveness;
+            const ec = e >= 8 ? 't' : e >= 6 ? 'a' : e ? 'c' : '';
+            document.getElementById('det-strip').innerHTML = [
+                { l: 'Effectiveness', v: e ? `${e}/10` : '—', c: ec, s: 'score' },
+                { l: 'Participants', v: m.participants.length, c: '', s: 'people' },
+                { l: 'Files', v: m.files.length, c: '', s: 'attached' },
+                { l: 'Duration', v: m.duration_minutes ? `${m.duration_minutes}m` : over.duration_minutes ? `${over.duration_minutes}m` : '—', c: '', s: 'recorded' },
+                { l: 'Participation', v: part.participation_balance || '—', c: '', s: 'balance' },
+                { l: 'Leader', v: part.leader || parseLeaders(part.speaking_volume_rank), c: 'p', s: 'facilitator' },
+            ].map(s => `<div class="sc"><div class="sl">${s.l}</div><div class="sv ${s.c}">${s.v}</div><div class="ss">${s.s}</div></div>`).join('');
+
+            // ── media ──
+            const mediaCard = document.getElementById('det-media-card');
+            const webmFile = m.files.find(f => f.filename.endsWith('.webm'));
+            if (webmFile) {
+                mediaCard.style.display = 'block';
+                const isVideo = webmFile.file_type === 'video' || webmFile.filename.includes('video');
+                const mediaUrl = `/api/meetings/file/${m.date}/${webmFile.filename}`;
+                document.getElementById('det-media-title').textContent = isVideo ? 'Video recording' : 'Audio recording';
+                document.getElementById('det-media-tag').textContent = isVideo ? 'video/webm' : 'audio/webm';
+                document.getElementById('det-media-meta').textContent = `${webmFile.filename} · ${fmtS(webmFile.size_bytes)}`;
+                if (isVideo) {
+                    const vid = document.getElementById('det-video');
+                    vid.style.display = 'block'; vid.src = mediaUrl;
+                    document.getElementById('det-audio-wrap').style.display = 'none';
+                } else {
+                    document.getElementById('det-audio-wrap').style.display = 'block';
+                    document.getElementById('det-video').style.display = 'none';
+                    document.getElementById('det-audio').src = mediaUrl;
+                    document.getElementById('det-audio-label').textContent = webmFile.filename;
+                }
+            } else { mediaCard.style.display = 'none'; }
+
+            // ════════════════════════════════
+            // TAB 1 — OVERVIEW
+            // ════════════════════════════════
+
+            // meeting info kv
+            document.getElementById('det-kv-info').innerHTML = [
+                ['Meeting ID', `<span style="font-family:monospace;font-size:12px;color:var(--tm)">${m.meeting_id}</span>`],
+                ['Date', m.date],
+                ['Purpose', over.explicit_purpose || over.implicit_purpose || '—'],
+                ['Problem', over.problem_addressed || '—'],
+                ['Has captions', m.has_captions ? '<span class="tag t">✓</span>' : '<span class="tag b">No</span>'],
+                ['Has transcript', m.has_transcript ? '<span class="tag t">✓</span>' : '<span class="tag b">No</span>'],
+                ['Has audio', m.has_audio ? '<span class="tag t">✓</span>' : '<span class="tag b">No</span>'],
+                ['Has video', m.has_video ? '<span class="tag t">✓</span>' : '<span class="tag b">No</span>'],
+            ].map(([l, v]) => `<div class="kv"><span class="kv-l">${l}</span><span class="kv-v">${v}</span></div>`).join('');
+
+            // theme kv
+            const hs = exLbl.health_signals || {};
+            document.getElementById('det-kv-theme').innerHTML = [
+                ['Primary theme', theme.primary_theme || '—'],
+                ['Secondary', (theme.secondary_themes || []).join(', ') || '—'],
+                ['Category', theme.category || '—'],
+                ['Exec label', exLbl.executive_label || '—'],
+                ['Confidence', theme.confidence_level || '—'],
+                ['Progress made', hs.progress_made != null ? (hs.progress_made ? '<span class="tag t">Yes</span>' : '<span class="tag c">No</span>') : '—'],
+                ['Clarity achieved', hs.clarity_achieved != null ? (hs.clarity_achieved ? '<span class="tag t">Yes</span>' : '<span class="tag c">No</span>') : '—'],
+                ['Blockers', hs.blockers_present != null ? (hs.blockers_present ? '<span class="tag c">Yes</span>' : '<span class="tag t">None</span>') : '—'],
+                ['Decisions', hs.decision_status || '—'],
+            ].map(([l, v]) => `<div class="kv"><span class="kv-l">${l}</span><span class="kv-v">${v}</span></div>`).join('');
+
+            // discussion flow
+            const segs = (flow.segments || []);
+            document.getElementById('det-segments').innerHTML = segs.length
+                ? segs.map(s => `
+            <div class="seg">
+                <div class="seg-phase">${s.phase}</div>
+                <div class="seg-desc">${s.description || ''}</div>
+                ${s.key_points?.length ? `<ul class="seg-pts">${s.key_points.map(p => `<li>${p}</li>`).join('')}</ul>` : ''}
+                ${s.turning_points?.length ? `<div style="margin-top:6px;font-size:11px;color:var(--ac)">⚡ ${s.turning_points.join(' · ')}</div>` : ''}
+            </div>`).join('')
+                : '<div class="muted" style="padding:8px">No flow data</div>';
+
+            // files
+            const ftCls = { summary: 't', captions: 'a', transcript: 'p', audio: 'b', video: 'b', unknown: 'b' };
+            const ftIco = { summary: '◆', captions: '≡', transcript: '≡', audio: '♪', video: '▶', unknown: '·' };
+            document.getElementById('det-file-count').textContent = `${m.files.length}`;
+            document.getElementById('det-files').innerHTML = m.files.map(f => `
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;border:1px solid var(--rule)">
+            <span class="tag ${ftCls[f.file_type] || 'b'}" style="flex-shrink:0;width:74px;text-align:center">${ftIco[f.file_type] || '·'} ${f.file_type}</span>
+            <span style="font-size:11px;font-family:monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)">${f.filename}</span>
+            <span class="muted" style="font-size:11px;flex-shrink:0">${fmtS(f.size_bytes)}</span>
+        </div>`).join('') || '<div class="muted">No files</div>';
+
+            // ════════════════════════════════
+            // TAB 2 — ANALYSIS
+            // ════════════════════════════════
+
+            // communication quality scores
+            const cq = comm;
+            document.getElementById('det-comm-scores').innerHTML = [
+                { l: 'Clarity', v: cq.clarity },
+                { l: 'Structure', v: cq.structure },
+                { l: 'Pacing', v: cq.pacing },
+                { l: 'Effectiveness', v: cq.effectiveness },
+            ].map(s => {
+                const cls = s.v >= 4 ? 't' : s.v >= 3 ? 'a' : s.v ? 'c' : '';
+                return `<div class="score-cell"><div class="sv ${cls}">${s.v ?? '—'}<span style="font-size:12px;color:var(--ink3)">/5</span></div><div class="sl">${s.l}</div></div>`;
+            }).join('');
+            document.getElementById('det-comm-hindrances').innerHTML = (cq.hindrances || []).length
+                ? `<div style="margin-top:4px">${cq.hindrances.map(h => `<div class="risk-item">${h}</div>`).join('')}</div>` : '';
+
+            // word bars
+            const words = part.words_spoken || {};
+            const wordEntries = Object.entries(words).sort((a, b) => b[1] - a[1]);
+            const maxW = wordEntries[0]?.[1] || 1;
+            document.getElementById('det-wordbars').innerHTML = wordEntries.length
+                ? wordEntries.map(([name, count]) => `
+            <div class="wbar-row">
+                <div class="av" style="width:24px;height:24px;font-size:9px;flex-shrink:0">${ini(name)}</div>
+                <span class="wbar-name">${name}</span>
+                <div class="wbar-track"><div class="wbar-fill" style="width:${Math.round((count / maxW) * 100)}%"></div></div>
+                <span class="wbar-val">${count.toLocaleString()}w</span>
+            </div>`).join('')
+                : '<div class="muted">No word count data</div>';
+            document.getElementById('det-part-meta').innerHTML = [
+                ['Balance', part.participation_balance],
+                ['Leader', part.leader],
+                ['Drivers', (part.conversation_drivers || []).map(d => d.name).join(', ')],
+            ].filter(([, v]) => v).map(([l, v]) => `<span style="font-size:11px;color:var(--ink3)">${l}: <strong style="color:var(--ink2)">${v}</strong></span>`).join('');
+
+            // key content
+            document.getElementById('det-key-content').innerHTML = [
+                ['Main topics', tags(keyC.main_topics || [], 'b')],
+                ['Standout ideas', (keyC.standout_ideas || []).map(x => `<div style="font-size:12px;color:var(--ink2);margin:2px 0">· ${x}</div>`).join('') || '—'],
+                ['Decisions made', (keyC.decisions_made || []).length ? tags(keyC.decisions_made, 't') : '<span class="muted">None recorded</span>'],
+            ].map(([l, v]) => `<div class="kv"><span class="kv-l">${l}</span><span class="kv-v">${v}</span></div>`).join('');
+
+            // questions
+            const qList = qs.explicit_questions || [];
+            document.getElementById('det-questions').innerHTML = qList.length
+                ? qList.map(q => `
+            <div class="q-item">
+                <div class="q-text">${q.question}</div>
+                <div class="q-meta">Asked by <strong>${q.asked_by}</strong> · ${q.answered ? '<span class="tag t">Answered</span>' : '<span class="tag c">Unanswered</span>'}</div>
+            </div>`).join('')
+                : '<div class="muted">No explicit questions recorded</div>';
+
+            // gaps & risks
+            const allRisks = [
+                ...(gaps.confusion_points || []),
+                ...(gaps.invalid_assumptions || []),
+                ...(gaps.potential_risks || []),
+            ];
+            document.getElementById('det-risks').innerHTML = allRisks.length
+                ? allRisks.map(r => `<div class="risk-item">${r}</div>`).join('')
+                : '<div class="muted">No gaps or risks identified</div>';
+
+            // insights
+            const allInsights = [
+                ...(acIns.improvements || []),
+                ...(acIns.practices_to_adopt || []),
+            ];
+            document.getElementById('det-insights').innerHTML = allInsights.length
+                ? allInsights.map(i => `<div class="insight-item">${i}</div>`).join('')
+                : '<div class="muted">No actionable insights</div>';
+
+            // ════════════════════════════════
+            // TAB 3 — PARTICIPANTS
+            // ════════════════════════════════
+
+            // score comparison bars
+            const scoreP = score.participants || {};
+            const sorted = Object.entries(scoreP).sort((a, b) => (a[1].rank || 99) - (b[1].rank || 99));
+            const maxScore = Math.max(...sorted.map(([, p]) => p.weighted_score || 0), 0.01);
+            document.getElementById('det-score-bars').innerHTML = sorted.length
+                ? sorted.map(([name, p]) => {
+                    const rankCls = p.rank === 1 ? 't' : p.rank <= 3 ? 'a' : 'b';
+                    return `
+            <div class="wbar-row" style="margin-bottom:10px">
+                <div class="av" style="width:26px;height:26px;font-size:9px;flex-shrink:0">${ini(name)}</div>
+                <span class="wbar-name">${name}</span>
+                <div class="wbar-track" style="height:8px"><div class="wbar-fill" style="width:${Math.round(((p.weighted_score || 0) / maxScore) * 100)}%"></div></div>
+                <span style="font-size:12px;font-weight:600;width:32px;text-align:right;flex-shrink:0">${p.weighted_score?.toFixed(1) || '—'}</span>
+                <span class="tag ${rankCls}" style="flex-shrink:0">#${p.rank || '—'}</span>
+            </div>`;
+                }).join('')
+                : m.participant_scores.length
+                    ? m.participant_scores.sort((a, b) => (a.rank || 99) - (b.rank || 99)).map(p => `
+                <div class="wbar-row" style="margin-bottom:10px">
+                    <div class="av" style="width:26px;height:26px;font-size:9px;flex-shrink:0">${ini(p.name)}</div>
+                    <span class="wbar-name">${p.name}</span>
+                    <div class="wbar-track" style="height:8px"><div class="wbar-fill" style="width:${Math.round(((p.weighted_score || 0) / 5) * 100)}%"></div></div>
+                    <span style="font-size:12px;font-weight:600;width:32px;text-align:right">${p.weighted_score?.toFixed(1) || '—'}</span>
+                    <span class="tag ${p.rank === 1 ? 't' : p.rank <= 3 ? 'a' : 'b'}">#${p.rank || '—'}</span>
+                </div>`).join('')
+                    : '<div class="muted">No score data</div>';
+
+            // individual speaker cards
+            const engP = part.engagement_patterns || {};
+            const allSpk = sorted.length ? sorted.map(([n, p]) => ({ name: n, ...p })) : m.participant_scores;
+            document.getElementById('det-spk-cards').innerHTML = allSpk.map(p => {
+                const name = p.name || Object.keys(p)[0];
+                const sp = spkQ[name] || {};
+                const sc = scoreP[name] || p;
+                const eng = engP[name] || '—';
+                const rankCls = sc.rank === 1 ? 't' : sc.rank <= 3 ? 'a' : 'b';
+                const flu = sp.fluency_indicators || {};
+                return `
+        <div class="spk">
+            <div class="spk-head">
+                <div class="av" style="width:38px;height:38px;font-size:13px;flex-shrink:0">${ini(name)}</div>
+                <div style="flex:1">
+                    <div style="font-size:14px;font-weight:500">${name}</div>
+                    <div style="font-size:11px;color:var(--ink3);display:flex;gap:8px;margin-top:2px">
+                        <span class="tag ${rankCls}" style="padding:1px 7px">#${sc.rank || '—'}</span>
+                        <span class="tag ${eng === 'active' ? 't' : 'b'}">${eng}</span>
+                        ${sp.intonation ? `<span class="tag b">${sp.intonation}</span>` : ''}
+                    </div>
+                </div>
+                <div style="text-align:right;flex-shrink:0">
+                    <div style="font-size:24px;font-weight:700;color:var(--tm)">${sc.weighted_score?.toFixed(1) || '—'}</div>
+                    <div style="font-size:10px;color:var(--ink3)">/ 5.0</div>
+                </div>
+            </div>
+            <div class="spk-meta">
+                ${[
+                        ['Participation', sc.participation],
+                        ['Clarity', sc.clarity],
+                        ['Technical', sc.technical],
+                        ['Communication', sc.communication],
+                        ['Leadership', sc.leadership],
+                        ['Confidence', sp.confidence_level],
+                    ].map(([lbl, val]) => `
+                <div class="spk-row">
+                    <span class="spk-lbl">${lbl}</span>
+                    <div class="wbar-track" style="height:4px;margin:3px 0">
+                        <div class="wbar-fill" style="width:${val ? Math.round((val / 5) * 100) : 0}%"></div>
+                    </div>
+                    <span class="spk-val">${val ?? '—'}/5</span>
+                </div>`).join('')}
+            </div>
+            ${(sp.strengths?.length || sp.weaknesses?.length) ? `
+            <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                ${sp.strengths?.length ? `
+                <div>
+                    <div style="font-size:10px;color:var(--tc);margin-bottom:4px;font-weight:600">STRENGTHS</div>
+                    ${sp.strengths.map(s => `<div style="font-size:11px;color:var(--ink2);margin-bottom:2px">· ${s}</div>`).join('')}
+                </div>` : ''}
+                ${sp.weaknesses?.length ? `
+                <div>
+                    <div style="font-size:10px;color:var(--cc);margin-bottom:4px;font-weight:600">WEAKNESSES</div>
+                    ${sp.weaknesses.map(s => `<div style="font-size:11px;color:var(--ink2);margin-bottom:2px">· ${s}</div>`).join('')}
+                </div>` : ''}
+            </div>` : ''}
+            ${flu.filler_word_frequency || flu.hesitations_noted != null ? `
+            <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--rule);display:flex;gap:8px;flex-wrap:wrap">
+                ${flu.filler_word_frequency ? `<span style="font-size:11px;color:var(--ink3)">Fillers: <strong style="color:var(--ink2)">${flu.filler_word_frequency}</strong></span>` : ''}
+                ${flu.hesitations_noted != null ? `<span style="font-size:11px;color:var(--ink3)">Hesitations: <strong style="color:var(--ink2)">${flu.hesitations_noted ? 'Yes' : 'No'}</strong></span>` : ''}
+                ${flu.code_switching_noted != null ? `<span style="font-size:11px;color:var(--ink3)">Code switching: <strong style="color:var(--ink2)">${flu.code_switching_noted ? 'Yes' : 'No'}</strong></span>` : ''}
+                ${flu.notes ? `<span style="font-size:11px;color:var(--ink3)">${flu.notes}</span>` : ''}
+            </div>` : ''}
+        </div>`;
+            }).join('') || '<div class="muted">No participant data</div>';
+
+            // ════════════════════════════════
+            // TAB 4 — SUMMARY
+            // ════════════════════════════════
+
+            // effectiveness scores
+            document.getElementById('det-eff-scores').innerHTML = [
+                { l: 'Meeting effectiveness', v: score.meeting_effectiveness_score || ovSum.overall_effectiveness, max: 10 },
+                { l: 'Clarity of outcome', v: score.clarity_of_outcome_score, max: 10 },
+                { l: 'Alignment score', v: score.alignment_score, max: 10 },
+            ].map(s => {
+                const cls = s.v >= 8 ? 't' : s.v >= 6 ? 'a' : s.v ? 'c' : '';
+                return `<div class="score-cell"><div class="sv ${cls}">${s.v ?? '—'}<span style="font-size:12px;color:var(--ink3)">/${s.max}</span></div><div class="sl">${s.l}</div></div>`;
+            }).join('');
+
+            // prose
+            document.getElementById('det-prose').textContent = ovSum.summary || '—';
+
+            // takeaways
+            const tks = ovSum.key_takeaways || [];
+            document.getElementById('det-takeaways').innerHTML = tks.length
+                ? tks.map(t => `<div class="takeaway"><div class="takeaway-dot"></div><div style="font-size:13px;color:var(--ink2)">${t}</div></div>`).join('')
+                : '<div class="muted">No takeaways</div>';
+
+            // action items
+            const acts = actI.items || [];
+            document.getElementById('det-actions').innerHTML = acts.length
+                ? acts.map(a => `<div class="insight-item">${typeof a === 'string' ? a : JSON.stringify(a)}</div>`).join('')
+                : '<div class="muted" style="font-size:13px;color:var(--ink3)">No action items recorded</div>';
+
+            // highlights
+            const hiList = [
+                ...(hi.notable_moments || []).map(x => ({ type: 'notable', text: x })),
+                ...(hi.disagreements || []).map(x => ({ type: 'disagreement', text: x })),
+                ...(hi.unusual_events || []).map(x => ({ type: 'unusual', text: x })),
+            ];
+            document.getElementById('det-highlights').innerHTML = hiList.length
+                ? hiList.map(h => {
+                    const cls = h.type === 'disagreement' ? 'risk-item' : 'insight-item';
+                    const lbl = h.type === 'notable' ? 'Notable' : h.type === 'disagreement' ? 'Disagreement' : 'Unusual';
+                    return `<div class="${cls}"><span style="font-size:10px;font-weight:600;opacity:.7;margin-right:6px">${lbl.toUpperCase()}</span>${h.text}</div>`;
+                }).join('')
+                : '<div class="muted">No highlights recorded</div>';
+
+            // raw JSON
+            if (m.summary_data) {
+                document.getElementById('det-raw').textContent = JSON.stringify(m.summary_data, null, 2);
+            }
+
+            document.getElementById('det-loading').style.display = 'none';
+            document.getElementById('det-content').style.display = 'block';
+        }
+
+        async function openToMeeting(id, date, origin) {
+            if (document.querySelectorAll(".summary-caption")) {
+                document.querySelectorAll(".summary-caption").forEach(el => el.remove());
+            }
+            location.hash = `meeting-${date}-${id}`;
+            _detailOrigin = origin || (document.getElementById('v-dash').classList.contains('on') ? 'dash' : 'meetings');
+            document.querySelectorAll('.view').forEach(x => x.classList.remove('on'));
+            document.querySelectorAll('.nl').forEach(x => x.classList.remove('on'));
+            document.getElementById('v-meeting-detail').classList.add('on');
+
+            // reset tabs to Overview
+            document.querySelectorAll('#v-meeting-detail .tab').forEach((t, i) => t.classList.toggle('on', i === 0));
+            document.querySelectorAll('#v-meeting-detail .tab-panel').forEach((p, i) => p.classList.toggle('on', i === 0));
+
+            document.getElementById('det-loading').style.display = 'block';
+            document.getElementById('det-content').style.display = 'none';
+            document.getElementById('det-title').innerHTML = `Meeting <em>${id}</em>`;
+            document.getElementById('det-sub').textContent = date;
+
+            try {
+                const d = await GET(`/api/meetings/${date}/${id}`);
+                renderDetail(d.meeting, id);
+            } catch (e) {
+                document.getElementById('det-loading').innerHTML = `<div style="color:var(--cc);padding:20px">Error: ${e.message}</div>`;
+            }
+        }
+
+        // meeting modal
+        async function openM(id, date) {
+            $('ov').classList.add('open');
+            $('mh').textContent = id; $('md').textContent = date;
+            $('mbody').innerHTML = `<div style="padding:32px;text-align:center"><span class="spin"></span></div>`;
+            try {
+                const d = await GET(`/api/meetings/${date}/${id}`);
+                const m = d.meeting; const e = m.overall_effectiveness;
+                const ec = e >= 8 ? 'var(--tc)' : e >= 6 ? 'var(--ac)' : 'var(--cc)';
+                $('mbody').innerHTML = `
+                    <div class="dg">
+                        <div class="db"><div class="dbl">Theme</div><div class="dbv" style="font-size:14px">${m.primary_theme || '—'}</div></div>
+                        <div class="db"><div class="dbl">Effectiveness</div><div class="dbv" style="color:${ec}">${e ? e + '/10' : '—'}</div></div>
+                        <div class="db"><div class="dbl">Participants</div><div class="dbv">${m.participants.length}</div></div>
+                        <div class="db"><div class="dbl">Files</div><div class="dbv">${m.files.length}</div></div>
+                    </div>
+                    <div class="slabel">File inventory</div>
+                    <div style="margin-bottom:4px">${m.files.map(f => `<div class="fc"><span class="fext">.${f.filename.split('.').pop()}</span>${f.filename.length > 42 ? f.filename.slice(0, 42) + '…' : f.filename} <span class="muted">${fmtS(f.size_bytes)}</span></div>`).join('')}</div>
+                    ${m.participant_scores.length ? `
+                        <div class="slabel">Participant scores</div>
+                        ${m.participant_scores.sort((a, b) => (a.rank || 99) - (b.rank || 99)).map(p => `
+                        <div class="pr">
+                            <div class="av">${ini(p.name)}</div>
+                            <div class="pname">${p.name}</div>
+                            <div class="sb" style="width:150px">
+                            <div class="sbt"><div class="sbf" style="width:${Math.round(((p.weighted_score || 0) / 5) * 100)}%"></div></div>
+                            <span class="sbv">${p.weighted_score?.toFixed(1) || '—'}</span>
+                            </div>
+                            <span class="tag ${p.rank === 1 ? 't' : p.rank <= 3 ? 'a' : 'b'}" style="margin-left:8px">#${p.rank || '—'}</span>
+                        </div>`).join('')}` : ''}
+                    `;
+            } catch (e) { $('mbody').innerHTML = `<div style="color:var(--cc);padding:20px">Error: ${e.message}</div>`; }
+        }
+        function closeModal() { $('ov').classList.remove('open'); }
+        function maybeClose(e) { if (e.target === $('ov')) closeModal(); }
+
+        // pipeline
+        async function run(mode, meeting_ids = null) {
+            const panel = $('jpanel'), term = $('jterm'), title = $('jtitle'), tag = $('jtag');
+            let filePaths = [];
+            let isSingle = false;
+
+            // ── File-based flow (no meeting_ids passed) ───────────────────────────
+            if (!meeting_ids) {
+                const selectedOptions = Array.from($('dinp').querySelectorAll('.dopt.selected'));
+
+                if (selectedOptions.length === 0) {
+                    toast('Please select at least one transcript', 'e');
+                    return;
+                }
+
+                const selectedTranscripts = selectedOptions.map(opt => {
+                    return _alltransriptsFiles[parseInt(opt.dataset.idx)];
+                });
+
+                filePaths = selectedTranscripts.map(t => t.path);
+                isSingle = selectedTranscripts.length === 1;
+            }
+
+            // ── Show job panel ────────────────────────────────────────────────────
+            panel.style.display = 'block';
+            title.textContent = `${mode} — running…`;
+            tag.className = 'tag a';
+            tag.textContent = 'running';
+            term.textContent = 'Dispatching…';
+
+            // ── Build payload ─────────────────────────────────────────────────────
+            const payload = {
+                mode,
+                force: false,
+                ...(meeting_ids ? { meeting_ids } : {}),
+                ...(filePaths.length ? { file_paths: filePaths } : {}),
+                ...(isSingle ? { file_path: filePaths[0] } : {}),
+            };
+
+            // ── Dispatch + poll ───────────────────────────────────────────────────
+            try {
+                const job = await POST('/api/pipeline/run', payload);
+                toast(`Job ${job.job_id} started`, 'i');
+                $('jmeta').innerHTML = `<span class="tag b">ID: ${job.job_id}</span><span class="tag p">${job.mode}</span>`;
+
+                _poll = setInterval(async () => {
+                    const s = await GET(`/api/pipeline/jobs/${job.job_id}`);
+                    term.textContent = s.output || s.error || '…waiting';
+                    term.scrollTop = term.scrollHeight;
+
+                    if (s.status === 'completed') {
+                        clearInterval(_poll);
+                        const hasFailures = s.output?.includes('❌');
+                        tag.className = `tag ${hasFailures ? 'a' : 't'}`;
+                        tag.textContent = hasFailures ? 'partial' : 'completed';
+                        title.textContent = `${mode} — ${hasFailures ? 'partial' : 'done'}`;
+                        toast(`Job ${s.job_id} ${hasFailures ? 'completed with errors' : 'completed'}`, hasFailures ? 'w' : 's');
+                        boot();
+                        if (meeting_ids) route()
+                    } else if (s.status === 'failed') {
+                        clearInterval(_poll);
+                        tag.className = 'tag c';
+                        tag.textContent = 'failed';
+                        title.textContent = `${mode} — failed`;
+                        toast(`Job ${job.job_id} failed`, 'e');
+                    }
+                }, 2000);
+
+            } catch (e) {
+                term.textContent = 'Error: ' + e.message;
+                toast('Failed: ' + e.message, 'e');
+            }
+        }
+
+        async function loadJobs() {
+            const jobs = await GET('/api/pipeline/jobs');
+            const tc = { completed: 't', failed: 'c', running: 'a', idle: 'b' };
+            $('jtb').innerHTML = jobs.length ? jobs.map(j => `<tr onclick="openJob('${j.job_id}')">
+                    <td style="font-family:monospace;font-size:11px;color:var(--ink2)">${j.job_id}</td>
+                    <td>${j.mode}</td>
+                    <td><span class="tag ${tc[j.status] || 'b'}">${j.status}</span></td>
+                    <td class="muted" style="font-size:12px">${fmt(j.started_at)}</td>
+                    <td class="muted" style="font-size:12px">${j.finished_at ? fmt(j.finished_at) : '—'}</td>
+                    <td class="muted">${j.files_processed}</td>
+                </tr>`).join('') : `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--ink3)">No jobs run this session</td></tr>`;
+        }
+
+        async function openJob(id) {
+            const j = await GET(`/api/pipeline/jobs/${id}`);
+            $('mh').textContent = `Job ${id}`; $('md').textContent = `${j.mode} · ${j.status}`;
+            $('mbody').innerHTML = `<div class="term">${j.output || j.error || 'No output.'}</div>`;
+            $('ov').classList.add('open');
+        }
+
+        async function fetchTranscriptProcessible() {
+            const transcripts = await GET(`/api/pipeline/transcripts`);
+            _alltransriptsFiles = Array.isArray(transcripts?.transcripts)
+                ? transcripts.transcripts.sort((a, b) => new Date(b?.date ?? 0) - new Date(a?.date ?? 0))
+                : transcripts ? transcripts.map(item => ({ name: item.meeting_id, date: item.date })) : [];
+
+            const container = $('dinp');
+            container.innerHTML = _alltransriptsFiles.map((item, index) => `
+                <div class="dopt" data-idx="${index}">
+                    ${item.name.replace(/meet-transcripts-/gi, '').replace(/meet_captions_/gi, '')} - ${item.date}
+                </div>
+            `).join('');
+            container.addEventListener('click', e => {
+                const opt = e.target.closest('.dopt');
+                if (!opt) return;
+                opt.classList.toggle('selected');
+                opt.style.background = opt.classList.contains('selected') ? 'Highlight' : '';
+                opt.style.color = opt.classList.contains('selected') ? 'HighlightText' : '';
+                updateDinpLabel();
+            });
+        }
+
+        async function route() {
+            const hash = location.hash.slice(1) || 'dash';
+
+            if (hash.startsWith('meeting-')) {
+                const parts = hash.split('-');
+                // meeting-2026-03-27-hrp-axdm-gqm → date=2026-03-27, id=hrp-axdm-gqm
+                const date = parts.slice(1, 4).join('-');
+                const id = parts.slice(4).join('-');
+                openToMeeting(id, date, _detailOrigin);
+                return;
+            }
+
+            const navMap = {
+                'dash': 0,
+                'meetings': 1,
+                'raw': 2,
+                'pipe': 3,
+                'jobs': 4,
+            };
+            const idx = navMap[hash] ?? 0;
+            nav(hash, document.querySelectorAll('.nl')[idx]);
+            if (idx === 3) {
+                try {
+                    await fetchTranscriptProcessible()
+                } catch (e) {
+
+                }
+            }
+        }
+
+        window.addEventListener('hashchange', route);
+        // boot
+        async function boot() {
+            try {
+                await Promise.all([loadAnalytics(), loadRecentMeetings()]);
+                $('last-up').textContent = 'Last updated ' + new Date().toLocaleTimeString();
+                const h = new Date().getHours();
+                const g = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+                $('greeting').innerHTML = `${g}, <em>ChronoFlow</em>`;
+            } catch (e) {
+                toast('Cannot reach API — is the server running?', 'e');
+                $('last-up').textContent = 'API unreachable';
+            }
+        }
+        route();
+        boot();
+    </script>
+</body>
+
+</html>
