@@ -23,6 +23,8 @@ def _detect_file_type(filename: str) -> FileType:
     name = filename.lower()
     if "summary" in name and name.endswith(".json"):
         return FileType.summary
+    if "caption" in name and "transcript" in name  and name.endswith(".json"):
+        return FileType.captions_and_transcripts
     if "caption" in name and name.endswith(".json"):
         return FileType.captions
     if "transcript" in name and name.endswith(".json"):

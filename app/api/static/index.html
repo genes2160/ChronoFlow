@@ -1460,6 +1460,7 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
+                                <th>Name</th>
                                 <th>Date</th>
                                 <th>Theme</th>
                                 <th>Participants</th>
@@ -1469,7 +1470,7 @@
                         </thead>
                         <tbody id="rtb">
                             <tr>
-                                <td colspan="6" class="muted"><span class="spin"></span> Loading…</td>
+                                <td colspan="7" class="muted"><span class="spin"></span> Loading…</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1534,6 +1535,7 @@
                         <thead class="sort-header">
                             <tr>
                                 <th onclick="sortBy('meeting_id')">ID</th>
+                                <th onclick="sortBy('meeting_name')">Name</th>
                                 <th onclick="sortBy('date')">Date</th>
                                 <th onclick="sortBy('primary_theme')">Theme</th>
                                 <th>Participants</th>
@@ -1544,7 +1546,7 @@
                         </thead>
                         <tbody id="mtb">
                             <tr>
-                                <td colspan="7" class="muted"><span class="spin"></span> Loading…</td>
+                                <td colspan="8" class="muted"><span class="spin"></span> Loading…</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1781,6 +1783,7 @@
                             <div class="tab" onclick="switchTab('participants',this)">Participants</div>
                             <div class="tab" onclick="switchTab('summary',this)">Summary</div>
                             <div class="tab" onclick="switchTab('captions',this)">Captions</div>
+                            <div class="tab" onclick="switchTab('transcripts',this)">Transcripts</div>
                         </div>
 
                         <!-- ── TAB: Overview ── -->
@@ -1999,6 +2002,52 @@
                             </div>
                         </div>
 
+                        <!-- ── TAB: Transcripts ── -->
+                        <div class="tab-panel" id="tp-transcripts">
+
+                            <!-- duration bar -->
+                            <div id="det-cap-transcript-header"
+                                style="display:none;padding:16px 20px;border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+                                <div class="sc" style="margin:0;min-width:120px">
+                                    <div class="sl">Duration</div>
+                                    <div class="sv" id="det-cap-transcript-duration">—</div>
+                                    <div class="ss">from captions</div>
+                                </div>
+                                <div class="sc" style="margin:0;min-width:120px">
+                                    <div class="sl">Turns</div>
+                                    <div class="sv" id="det-cap-transcript-turns">—</div>
+                                    <div class="ss">total</div>
+                                </div>
+                                <div class="sc" style="margin:0;min-width:120px">
+                                    <div class="sl">Speakers</div>
+                                    <div class="sv" id="det-cap-transcript-speakers">—</div>
+                                    <div class="ss">unique</div>
+                                </div>
+                                <div style="margin-left:auto">
+                                    <input id="det-cap-transcript-search" type="text" placeholder="Search captions…"
+                                        oninput="filterTranscripts(this.value)"
+                                        style="font-family:var(--fd);font-size:12px;padding:7px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:200px" />
+                                </div>
+                            </div>
+
+                            <!-- loading -->
+                            <div id="det-cap-transcript-loading"
+                                style="padding:48px;text-align:center;color:var(--ink3)">
+                                <span class="spin"></span> Loading Transcripts…
+                            </div>
+
+                            <!-- empty state -->
+                            <div id="det-cap-transcript-empty"
+                                style="display:none;padding:48px;text-align:center;color:var(--ink3)">
+                                No Transcript file found for this meeting
+                            </div>
+
+                            <!-- transcripts list -->
+                            <div id="det-cap-transcript-list"
+                                style="display:none;padding:16px 20px;display:none;flex-direction:column;gap:2px;max-height:600px;overflow-y:auto">
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -2042,6 +2091,7 @@
         const yesBtn = document.getElementById('confirm-yes');
         const noBtn = document.getElementById('confirm-no');
         let _captionsData = [];   // full list, used for filtering
+        let _transcriptsData = [];   // full list, used for filtering
         let _alltransriptsFiles = [];
         function toggleDinp() {
             const d = $('dinp');
@@ -2105,8 +2155,7 @@
         }
 
         function renderCaptionRow(c, offsetMs) {
-            console.log("...captionData", c, offsetMs)
-            const relMs = (c?.ts ?? 0) - offsetMs;
+            const relMs = (c?.timestamp || c?.ts || 0) - offsetMs;
             const relStr = fmtRelTime(relMs > 0 ? relMs : 0);
             const name = c?.speaker?.trim() || '';
             const colour = spkColour(name || null);
@@ -2129,82 +2178,113 @@
             });
         }
 
-        async function loadCaptions(meetingId, date) {
-            // reset state
-            Object.keys(_spkMap).forEach(k => delete _spkMap[k]);
-            _spkIdx = 0;
-            _captionsData = [];
+        function filterTranscript(query) {
+            const q = query?.toLowerCase() ?? '';
+            document.querySelectorAll('#det-cap-transcript-list .cap-row').forEach(row => {
+                const match = !q || (row.dataset?.text ?? '').includes(q);
+                row.style.display = match ? '' : 'none';
+            });
+        }
 
-            const headerEl = document.getElementById('det-cap-header');
-            const loadingEl = document.getElementById('det-cap-loading');
-            const emptyEl = document.getElementById('det-cap-empty');
-            const listEl = document.getElementById('det-cap-list');
-
-            if (headerEl) headerEl.style.display = 'none';
-            if (loadingEl) loadingEl.style.display = 'block';
-            if (emptyEl) emptyEl.style.display = 'none';
-            if (listEl) listEl.style.display = 'none';
-
+        async function fetchCaptionsAndTranscripts(meetingId, date) {
             try {
                 const d = await GET(`/api/meetings/${date}/${meetingId}/captions`);
                 const captions = d?.captions ?? [];
-
-                if (!captions.length) {
-                    if (loadingEl) loadingEl.style.display = 'none';
-                    if (emptyEl) emptyEl.style.display = 'block';
-                    return;
-                }
-
-                _captionsData = captions;
-
-                // ── duration calc ──
-                const timestamps = captions.map(c => c?.ts).filter(t => t != null);
-                const firstTs = Math.min(...timestamps);
-                const lastTs = Math.max(...timestamps);
-                const durationMs = lastTs - firstTs;
-
-                // unique speakers
-                const uniqueSpk = new Set(captions.map(c => c?.speaker?.trim()).filter(Boolean));
-
-                // stats
-                const durEl = document.getElementById('det-cap-duration');
-                const trnEl = document.getElementById('det-cap-turns');
-                const spkEl = document.getElementById('det-cap-speakers');
-                const srchEl = document.getElementById('det-cap-search');
-
-                if (durEl) durEl.textContent = fmtDuration(durationMs);
-                if (trnEl) trnEl.textContent = captions.length;
-                if (spkEl) spkEl.textContent = uniqueSpk.size;
-                if (srchEl) srchEl.value = '';
-
-                // ── render rows ──
-                if (listEl) {
-                    listEl.innerHTML = captions.map(c => renderCaptionRow(c, firstTs)).join('');
-                    listEl.style.display = 'flex';
-                }
-
-                if (headerEl) headerEl.style.display = 'flex';
-                if (loadingEl) loadingEl.style.display = 'none';
-
+                const transcripts = d?.transcripts ?? [];
+                return { captions, transcripts };
             } catch (e) {
-                if (loadingEl) loadingEl.innerHTML = `<div style="color:var(--cc)">Could not load captions: ${e?.message ?? 'unknown error'}</div>`;
+                console.error("Error fetching captions and transcripts:", e);
+                return { captions: [], transcripts: [] };
             }
         }
 
-        function switchTab(name, el) {
+        async function switchTab(name, el) {
             document.querySelectorAll('#v-meeting-detail .tab').forEach(t => t.classList.remove('on'));
             document.querySelectorAll('#v-meeting-detail .tab-panel').forEach(p => p.classList.remove('on'));
             el.classList.add('on');
             document.getElementById('tp-' + name).classList.add('on');
-            // lazy-load captions only when tab is first opened
-            // if (name === 'captions' && !_captionsData.length) {
-            if (name === 'captions') {
-                const titleEl = document.getElementById('det-title');
-                const subEl = document.getElementById('det-sub');
-                const id = titleEl?.textContent?.replace('Meeting ', '')?.trim() ?? '';
-                const date = subEl?.textContent?.trim() ?? '';
-                if (id && date) loadCaptions(id, date);
+
+            const titleEl = document.getElementById('det-title');
+            const subEl = document.getElementById('det-sub');
+            const id = titleEl?.textContent?.replace('Meeting ', '')?.trim() ?? '';
+            const date = subEl?.textContent?.trim() ?? '';
+            if (!id || !date) return;
+
+            // Load once
+            if (!_captionsData.length && !_transcriptsData.length) {
+                const data = await fetchCaptionsAndTranscripts(id, date);
+                _captionsData = data.captions;
+                _transcriptsData = data.transcripts;
+                console.log(`Fetched ${data.captions?.length} captions and ${data.transcripts?.length} transcript entries from server`, data); // debug
             }
+
+            // Render depending on tab
+            if (name === 'captions') {
+                renderCaptionsFromCache();
+            }
+
+            if (name === 'transcripts') {
+                console.log("Rendering transcripts from cache", _transcriptsData); // debug
+                renderTranscriptsFromCache();
+            }
+        }
+        function renderCaptionsFromCache() {
+            const captions = _captionsData;
+            if (!captions.length) return;
+
+            const listEl = document.getElementById('det-cap-list');
+            const headerEl = document.getElementById('det-cap-header');
+            const loadingEl = document.getElementById('det-cap-loading');
+            const emptyEl = document.getElementById('det-cap-empty');
+
+            const timestamps = captions.map(c => c?.ts).filter(t => t != null);
+            const firstTs = Math.min(...timestamps);
+            const lastTs = Math.max(...timestamps);
+            const durationMs = lastTs - firstTs;
+
+            const uniqueSpk = new Set(captions.map(c => c?.speaker?.trim()).filter(Boolean));
+
+            document.getElementById('det-cap-duration').textContent = fmtDuration(durationMs);
+            document.getElementById('det-cap-turns').textContent = captions.length;
+            document.getElementById('det-cap-speakers').textContent = uniqueSpk.size;
+
+            listEl.innerHTML = captions.map(c => renderCaptionRow(c, firstTs)).join('');
+            listEl.style.display = 'flex';
+            headerEl.style.display = 'flex';
+            loadingEl.style.display = 'none';
+            emptyEl.style.display = 'none';
+        }
+
+        function renderTranscriptsFromCache() {
+            const transcript = _transcriptsData;
+            if (!transcript.length) return;
+
+            const listEl = document.getElementById('det-cap-transcript-list');
+            const headerEl = document.getElementById('det-cap-transcript-header');
+            const loadingEl = document.getElementById('det-cap-transcript-loading');
+            const emptyEl = document.getElementById('det-cap-transcript-empty');
+
+            const timestamps = transcript.map(c => c?.timestamp).filter(t => t != null);
+            const firstTs = Math.min(...timestamps);
+            const lastTs = Math.max(...timestamps);
+            const durationMs = lastTs - firstTs;
+
+            const uniqueSpk = new Set(transcript.map(c => c?.speaker?.trim()).filter(Boolean));
+
+            document.getElementById('det-cap-transcript-duration').textContent = fmtDuration(durationMs);
+            document.getElementById('det-cap-transcript-turns').textContent = transcript.length;
+            document.getElementById('det-cap-transcript-speakers').textContent = uniqueSpk.size;
+
+            listEl.innerHTML = transcript.map(c => {
+                if (!c.speaker) {
+                    c.speaker = 'Eugene';
+                }
+                return renderCaptionRow(c, firstTs);
+            }).join('');
+            listEl.style.display = 'flex';
+            headerEl.style.display = 'flex';
+            loadingEl.style.display = 'none';
+            emptyEl.style.display = 'none';
         }
 
         function backFromDetail() {
@@ -2298,17 +2378,18 @@
         }
 
         // meetings
-        function mrow(m, cols = 6) {
+        function mrow(m, cols = 7) {
             const e = m.overall_effectiveness;
             const ec = e >= 8 ? 'var(--tc)' : e >= 6 ? 'var(--ac)' : e ? 'var(--cc)' : 'var(--ink3)';
             const sb = m.has_summary ? `<span class="tag t">✓ Done</span>` : `<span class="tag a">Pending</span>`;
             let r = `<tr onclick="openToMeeting('${m.meeting_id}','${m.date}', 'meetings')">
                 <td style="font-family:monospace;font-size:11px;color:var(--ink2)">${m.meeting_id}</td>
+                <td style="font-family:monospace;font-size:11px;color:var(--ink2)">${m?.meeting_name ?? 'N/A'}</td>
                 <td class="muted">${m.date}</td>
                 <td>${m.primary_theme || '<span class="muted">—</span>'}</td>
                 <td><span class="tag p">${m.participants.length}</span></td>
                 <td style="font-weight:500;color:${ec}">${e ? e + '/10' : '—'}</td>`;
-            if (cols === 7) r += `<td class="muted">${m.files.length} files</td>`;
+            if (cols === 8) r += `<td class="muted">${m.files.length} files</td>`;
             r += `<td>${sb}</td></tr>`;
             return r;
         }
@@ -2316,7 +2397,7 @@
         async function loadRecentMeetings() {
             const d = await GET('/api/meetings/');
             _all = d.meetings;
-            $('rtb').innerHTML = _all.slice(0, 8).map(m => mrow(m, 6)).join('') || `<tr><td colspan="6" class="muted">No meetings found</td></tr>`;
+            $('rtb').innerHTML = _all.slice(0, 8).map(m => mrow(m, 7)).join('') || `<tr><td colspan="8" class="muted">No meetings found</td></tr>`;
         }
 
         let state = {
@@ -2384,7 +2465,7 @@
             $('resultsInfo').textContent = `Showing ${start}–${end} of ${total} meetings`;
         }
         async function loadMeetings() {
-            $('mtb').innerHTML = `<tr><td colspan="7" class="muted"><span class="spin"></span> Loading…</td></tr>`;
+            $('mtb').innerHTML = `<tr><td colspan="8" class="muted"><span class="spin"></span> Loading…</td></tr>`;
 
             const params = new URLSearchParams({
                 page: state.page,
@@ -2410,7 +2491,7 @@
         function fmtgs() {
             const dt = $('dfilter').value;
             const f = dt ? _all.filter(m => m.date === dt) : _all;
-            $('mtb').innerHTML = f.map(m => mrow(m, 7)).join('') || `<tr><td colspan="7" class="muted">No meetings</td></tr>`;
+            $('mtb').innerHTML = f.map(m => mrow(m, 8)).join('') || `<tr><td colspan="8" class="muted">No meetings</td></tr>`;
         }
 
         // raw
@@ -2562,9 +2643,13 @@
             const ec = e >= 8 ? 't' : e >= 6 ? 'a' : e ? 'c' : '';
             document.getElementById('det-strip').innerHTML = [
                 { l: 'Effectiveness', v: e ? `${e}/10` : '—', c: ec, s: 'score' },
-                { l: 'Participants', v: m.participants.length, c: '', s: 'people' },
+                { l: 'Participants', v: m.attendee_count || m.participants.length, c: '', s: 'people' },
+                { l: 'Words', v: m.total_words ? m.total_words.toLocaleString() : '—', c: '', s: 'spoken' },   // NEW
+
+                { l: 'Duration', v: m.duration_ms ? `${Math.round(m.duration_ms / 60000)}m` : m.duration_minutes ? `${m.duration_minutes}m` : over.duration_minutes ? `${over.duration_minutes}m` : '—', c: '', s: 'recorded' },  // USE duration_ms
+
+                { l: 'Avg confidence', v: m.avg_confidence ? Math.round(m.avg_confidence * 100) + '%' : '—', c: '', s: 'speech' }, // NEW
                 { l: 'Files', v: m.files.length, c: '', s: 'attached' },
-                { l: 'Duration', v: m.duration_minutes ? `${m.duration_minutes}m` : over.duration_minutes ? `${over.duration_minutes}m` : '—', c: '', s: 'recorded' },
                 { l: 'Participation', v: part.participation_balance || '—', c: '', s: 'balance' },
                 { l: 'Leader', v: part.leader || parseLeaders(part.speaking_volume_rank), c: 'p', s: 'facilitator' },
             ].map(s => `<div class="sc"><div class="sl">${s.l}</div><div class="sv ${s.c}">${s.v}</div><div class="ss">${s.s}</div></div>`).join('');
@@ -2598,6 +2683,7 @@
             // meeting info kv
             document.getElementById('det-kv-info').innerHTML = [
                 ['Meeting ID', `<span style="font-family:monospace;font-size:12px;color:var(--tm)">${m.meeting_id}</span>`],
+                ['Meeting name', m.meeting_name || '—'],  // NEW
                 ['Date', m.date],
                 ['Purpose', over.explicit_purpose || over.implicit_purpose || '—'],
                 ['Problem', over.problem_addressed || '—'],
@@ -2868,6 +2954,8 @@
         }
 
         async function openToMeeting(id, date, origin) {
+            _captionsData = [];   // full list, used for filtering
+            _transcriptsData = [];   // full list, used for filtering
             if (document.querySelectorAll(".summary-caption")) {
                 document.querySelectorAll(".summary-caption").forEach(el => el.remove());
             }

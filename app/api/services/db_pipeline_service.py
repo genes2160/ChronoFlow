@@ -97,11 +97,12 @@ async def trigger_organize(force: bool = False) -> PipelineRunResponse:
             from runner import main as run_organize
             from app.api.services.migration_runner import run_backfill
             statuses = await asyncio.to_thread(run_organize)
-            run_backfill()  # one-time backfill for pre-pipeline data; can be removed after a few runs
+            await asyncio.to_thread(run_backfill) # one-time backfill for pre-pipeline data; can be removed after a few runs
             _update_job(
                 job.job_id,
                 status=PipelineStatus.completed,
                 output=f"Organize complete: {statuses}",
+                files_processed=statuses.get("total_files", 0),
                 finished_at=datetime.utcnow(),
             )
         except Exception as e:
