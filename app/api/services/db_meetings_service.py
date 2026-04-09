@@ -105,6 +105,15 @@ def _build_meeting_summary(
         participant_scores=score_schemas,
         files=files,
         summary_data=summary_data,
+
+        # ── ADD THESE ─────────────────────────────
+        meeting_name=meeting.meeting_name,
+        start_time=meeting.start_time,
+        end_time=meeting.end_time,
+        duration_ms=meeting.duration_ms,
+        attendee_count=meeting.attendee_count,
+        total_words=meeting.total_words,
+        avg_confidence=meeting.avg_confidence,
     )
 
 
@@ -227,7 +236,7 @@ def get_meeting_detail(meeting_id: str, date: str) -> MeetingSummary | None:
         return summary
 
 
-def get_captions(meeting_id: str, date: str) -> list | None:
+def get_captions_and_transcripts(meeting_id: str, date: str) -> dict | None:
     with get_session() as session:
         meeting = session.exec(
             select(Meeting).where(
@@ -245,10 +254,22 @@ def get_captions(meeting_id: str, date: str) -> list | None:
             .order_by(Caption.ts)
         ).all()
 
-        return [
-            {"speaker": c.speaker, "text": c.text, "ts": c.ts}
-            for c in captions
-        ]
+        transcripts = session.exec(
+            select(TranscriptTurn)
+            .where(TranscriptTurn.meeting_id == meeting.id)
+            .order_by(TranscriptTurn.timestamp)
+        ).all()
+
+        return {
+            "captions": [
+                {"speaker": c.speaker, "text": c.text, "ts": c.ts}
+                for c in captions
+            ],
+            "transcripts": [
+                {"speaker": t.speaker, "text": t.text, "timestamp": t.timestamp}
+                for t in transcripts
+            ]
+        }
 
 
 

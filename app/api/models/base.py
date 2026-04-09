@@ -2,7 +2,7 @@
 from datetime import datetime
 from typing import Optional
 from sqlmodel import SQLModel, Field, Column, DateTime, func, BigInteger, Float, String
-from sqlalchemy import JSON, Enum
+from sqlalchemy import JSON, Enum,Index, UniqueConstraint
 from enum import Enum as PyEnum
 
 

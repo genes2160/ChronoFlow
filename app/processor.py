@@ -35,7 +35,8 @@ def process_json_files(files, tracker):
             failed_count+=1
     return {
         "status": STATUS["completed"],
-        "message": f"Processed {success_count}, failed {failed_count} and skipped {skipped_count} records out of {len(files)}"
+        "message": f"Processed {success_count}, failed {failed_count} and skipped {skipped_count} records out of {len(files)}",
+        "total_files": f"{len(files)}",
     }
 
 

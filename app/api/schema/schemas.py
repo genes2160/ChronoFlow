@@ -13,6 +13,7 @@ from enum import Enum
 class FileType(str, Enum):
     audio = "audio"
     video = "video"
+    captions_and_transcripts = "captions_and_transcripts"
     captions = "captions"
     transcript = "transcript"
     summary = "summary"
@@ -75,7 +76,13 @@ class MeetingSummary(BaseModel):
     participant_scores: List[ParticipantScore] = []
     files: List[MeetingFile] = []
     summary_data: Optional[Dict[str, Any]] = None
-
+    meeting_name: Optional[str] = None
+    start_time: Optional[int] = None
+    end_time: Optional[int] = None
+    duration_ms: Optional[int] = None
+    attendee_count: Optional[int] = None
+    total_words: Optional[int] = None
+    avg_confidence: Optional[float] = None
 
 class MeetingsListResponse(BaseModel):
     total_dates: int

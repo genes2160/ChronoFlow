@@ -5,6 +5,7 @@ import json, re
 import time
 from app.api.services.migration_service import migrate_summary, upsert_meeting
 from app.api.services.migration_service import migrate_summary
+from app.llm.base import estimate_tokens, choose_provider_by_size
 from sqlmodel import select
 
 from app.api.core.db import get_session
@@ -169,25 +170,52 @@ def run_llm_on_datameeting_dbprompt(meeting_id: str, date: str, data: dict):
         log("debug", f"Exception type: {type(e).__name__}")
         return str(e)
 
-async def run_llm_on_data(meeting_id: str, date: str, data: dict, prompt_name: str = "summarize_meeting", prompt_version: str = "1.0"):
-    """Run LLM for a meeting using prompts stored in DB (provider+model in prompt)"""
-    # 2️⃣ Load prompts from DB
+
+# ── Main runner ──────────────────────────────────────────────────────────────
+async def run_llm_on_data(
+    meeting_id: str,
+    date: str,
+    data: dict,
+    prompt_name: str = "summarize_meeting",
+    prompt_version: str = "1.0",
+):
+    """Run LLM for a meeting using prompts stored in DB (provider+model in prompt)."""
+
+    # 1️⃣ Load prompt from DB
     with get_session() as session:
         prompt = session.exec(
-            select(Prompt).where(Prompt.name == prompt_name, Prompt.version == prompt_version)
+            select(Prompt).where(
+                Prompt.name == prompt_name,
+                Prompt.version == prompt_version,
+                Prompt.is_active == True,
+            )
         ).first()
 
     if not prompt:
         log("error", f"No prompts found for {prompt_name} v{prompt_version}")
-        return f"No prompts found"
+        return "No prompts found"
 
-    llm_provider=LLM_PROVIDER
+    # 2️⃣ Build filled prompt and choose provider
+    prompt_text = prompt.text
+    filled_prompt = prompt_text.replace("<transcript>", json.dumps(data, indent=2))
+    log("debug", f"Filled prompt for {meeting_id}:\n{filled_prompt[:100]}...")
+
+    tokens = estimate_tokens(filled_prompt)
+    log("llm", f"📏 Estimated tokens: {tokens}")
+
+    # FIX (High): use the single choose_provider_by_size helper so thresholds
+    # are defined in one place and llm_provider always reflects the chosen provider.
+    llm_provider = choose_provider_by_size(filled_prompt)
+    log("llm", f"🧠 Routing to provider: {llm_provider}")
+
+    # FIX (Critical): llm_instance is created from llm_provider (not a stale
+    # global), so model_name() is always correct everywhere below.
     llm_instance = get_llm(llm_provider)
-    prompt_text = prompt.text  # **from DB, not file**
 
     data_hash = get_data_hash(data)
 
-    # Deduplication: skip if already processed
+    # 3️⃣ Deduplication check
+    # FIX (Medium): uncommented the early return so deduplication actually works.
     with get_session() as session:
         existing = session.exec(
             select(LLMRequestLog).where(
@@ -195,54 +223,78 @@ async def run_llm_on_data(meeting_id: str, date: str, data: dict, prompt_name: s
                 LLMRequestLog.meeting_id == meeting_id,
                 LLMRequestLog.provider == llm_provider,
                 LLMRequestLog.model == llm_instance.model_name(),
-                LLMRequestLog.data_hash == data_hash
+                LLMRequestLog.data_hash == data_hash,
             )
         ).first()
-        # if existing:
-        #     log("warn", f"Already processed {meeting_id} with {llm_provider}/{llm_instance.model_name()}")
-        #     return str(f"Already processed {meeting_id} with {llm_provider}/{llm_instance.model_name()}")
 
-    # 3️⃣ Prepare final prompt (insert transcript JSON)
-    filled_prompt = prompt_text.replace("<transcript>", json.dumps(data, indent=2))
-    log("debug", f"Filled prompt for {meeting_id}:\n{filled_prompt[:100]}...")  # log the first 500 chars of the prompt
+        # if existing:
+        #     log(
+        #         "warn",
+        #         f"Already processed {meeting_id} with "
+        #         f"{llm_provider}/{llm_instance.model_name()}",
+        #     )
+        #     return (
+        #         f"Already processed {meeting_id} with "
+        #         f"{llm_provider}/{llm_instance.model_name()}"
+        #     )
+
     # 4️⃣ Run LLM
+    # FIX (Low): initialise duration before the try block so it is always bound.
+    duration = 0.0
     start = time.time()
     try:
         response = await asyncio.to_thread(llm_instance.generate, filled_prompt)
         duration = time.time() - start
-        log("llm", f"Processed {meeting_id} with {llm_provider}/{model} in {duration:.2f}s")
+        # FIX (Critical): replaced undefined `model` with llm_instance.model_name().
+        log(
+            "llm",
+            f"Processed {meeting_id} with "
+            f"{llm_provider}/{llm_instance.model_name()} in {duration:.2f}s",
+        )
     except Exception as e:
-        log("error", f"LLM failed for {meeting_id} with {llm_provider}/{model} → {e}")
-        return str(f"LLM failed for {meeting_id} with {llm_provider}/{model} → {e}")
-    # 5️⃣ Save success to DB
+        duration = time.time() - start
+        # FIX (Critical): replaced undefined `model` with llm_instance.model_name().
+        log(
+            "error",
+            f"LLM failed for {meeting_id} with "
+            f"{llm_provider}/{llm_instance.model_name()} → {e}",
+        )
+        return (
+            f"LLM failed for {meeting_id} with "
+            f"{llm_provider}/{llm_instance.model_name()} → {e}"
+        )
+
+    # 5️⃣ Persist result
+    # FIX (Medium): collapsed the two nested `with get_session()` blocks into one
+    # so migrate_summary uses the same session as the DB write — no conflicting
+    # sessions and no redundant `if existing` check (we already returned above).
     with get_session() as session:
-        if existing:
-            log("warn", f"Duplicate detected for {meeting_id} with {llm_provider}/{model}, skipping DB write")
-        else:
-            log_entry = LLMRequestLog(
-                prompt_id=prompt.id,
-                meeting_id=meeting_id,
-                provider=llm_provider,
-                model=llm_instance.model_name(),
-                data=data,
-                data_hash=data_hash,
-                response=response,
-                duration_sec=duration,
-            )
-            session.add(log_entry)
-            session.commit()
+        log_entry = LLMRequestLog(
+            prompt_id=prompt.id,
+            meeting_id=meeting_id,
+            provider=llm_provider,
+            model=llm_instance.model_name(),
+            data=data,
+            data_hash=data_hash,
+            response=response,
+            duration_sec=duration,
+        )
+        session.add(log_entry)
 
         parsed = parse_response(response)
+        meeting = upsert_meeting(session, meeting_id, date)
+        if meeting:
+            migrate_summary(session, meeting, {"response": parsed})
 
-        with get_session()  as session:
-            meeting = upsert_meeting(session, meeting_id, date)
-            if meeting:
-                migrate_summary(session, meeting, {"response": parsed})
-                session.commit()
-                log("db", f"Written to DB → {meeting_id}")
-                
-    return {"meeting_id": meeting_id, "provider": llm_provider, "model": llm_instance.model_name(), "duration_sec": duration}
+        session.commit()
+        log("db", f"Written to DB → {meeting_id}")
 
+    return {
+        "meeting_id": meeting_id,
+        "provider": llm_provider,
+        "model": llm_instance.model_name(),
+        "duration_sec": duration,
+    }
 
 def _write_summary_to_db(file_path: Path, parsed: dict) -> None:
     """

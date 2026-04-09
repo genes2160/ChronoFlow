@@ -1,4 +1,4 @@
-from app.api.models.base import SQLModel, Optional, Field, datetime, JSON, Column, Enum, FileTypeEnum, PipelineStatusEnum, DateTime, func, BigInteger, Float, String
+from app.api.models.base import SQLModel, Optional, Field, datetime, JSON, Column, Enum, FileTypeEnum, PipelineStatusEnum, DateTime, func, BigInteger, Float, String,Index, UniqueConstraint
 
 class User(SQLModel, table=True):
     __tablename__ = "users"
@@ -17,15 +17,42 @@ class User(SQLModel, table=True):
 
 class Meeting(SQLModel, table=True):
     __tablename__ = "meetings"
+
+    __table_args__ = (
+        Index("idx_meetings_start_time", "start_time"),
+        Index("idx_meetings_attendee_count", "attendee_count"),
+        Index("idx_meetings_total_words", "total_words"),
+    )
+
     id: Optional[int] = Field(default=None, primary_key=True)
+
     meeting_id: str = Field(unique=True, index=True)  # e.g. hrp-axdm-gqm
+    meeting_name: Optional[str] = Field(default=None, index=True)
+
     date: str = Field(index=True)  # you filter by date constantly
+
     duration_minutes: Optional[int] = None
+    duration_ms: Optional[int] = None
+
+    start_time: Optional[int] = Field(
+        default=None,
+        sa_column=Column(BigInteger, nullable=True)
+    )
+    end_time: Optional[int] = Field(
+        default=None,
+        sa_column=Column(BigInteger, nullable=True)
+    )
+
+    attendee_count: Optional[int] = None
+    total_words: Optional[int] = None
+    avg_confidence: Optional[float] = None
+
     has_summary: bool = False
     has_captions: bool = False
     has_transcript: bool = False
     has_audio: bool = False
     has_video: bool = False
+
     uploaded_by: Optional[int] = Field(default=None, foreign_key="users.id")
     # add this to every table
     created_at: datetime = Field(
@@ -60,6 +87,11 @@ class Caption(SQLModel, table=True):
 
 class TranscriptTurn(SQLModel, table=True):
     __tablename__ = "transcript_turns"
+
+    __table_args__ = (
+        Index("idx_transcript_timestamp", "meeting_id", "timestamp"),
+    )
+
     id: Optional[int] = Field(default=None, primary_key=True)
     meeting_id: int = Field(foreign_key="meetings.id", index=True)
     turn_id: int

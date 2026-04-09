@@ -50,11 +50,12 @@ def list_raw_files():
 
 @router.get("/{date}/{meeting_id}/captions", summary="Get captions for a meeting")
 def get_captions(date: str, meeting_id: str):
-    # captions =  db_meetings_service.get_captions(meeting_id, date)
-    captions = meetings_service.get_captions(meeting_id, date)
+    captions =  db_meetings_service.get_captions_and_transcripts(meeting_id, date)
+    # captions = meetings_service.get_captions(meeting_id, date)
     if captions is None:
         raise HTTPException(status_code=404, detail="No captions file found for this meeting")
-    return {"captions": captions}
+    # return {"captions": captions}
+    return captions
 
 
 @router.get("/{date}/{meeting_id}", response_model=MeetingDetailResponse, summary="Get meeting detail")

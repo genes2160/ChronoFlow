@@ -176,13 +176,15 @@ def run_backfill():
                     )
                 
                 for meeting_id, files in meeting_map.items():
-                    summary_json = transcript_json = captions_json = None
+                    summary_json = captions_and_transcripts = transcript_json = captions_json = None
                     media_files = []
 
                     for f in files:
                         ft = _detect_file_type(f.name)
                         if ft == FileType.summary:
                             summary_json = _load_json(f)
+                        elif ft == FileType.captions_and_transcripts:
+                            captions_and_transcripts = _load_json(f)
                         elif ft == FileType.transcript:
                             transcript_json = _load_json(f)
                         elif ft == FileType.captions:
@@ -196,6 +198,7 @@ def run_backfill():
                             meeting_id=meeting_id,
                             date=date,
                             summary_json=summary_json,
+                            captions_and_transcripts=captions_and_transcripts,
                             transcript_json=transcript_json,
                             captions_json=captions_json,
                             media_files=media_files,

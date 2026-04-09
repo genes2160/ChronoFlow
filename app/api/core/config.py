@@ -18,7 +18,9 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str = ""
     JINA_API_KEY: str = ""
     ANTHROPIC_API_KEY: str = ""
-    
+    GOOGLE_API_KEY: str = ""
+    TOGETHER_API_KEY: str = ""
+
     RUNNER_SCRIPT: str = "runner.py"
     LLM_RUNNER_SCRIPT: str = "llm_runner.py"
     
