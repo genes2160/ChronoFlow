@@ -451,7 +451,7 @@
 
         .tag.p {
             background: var(--pl);
-            color: var(--pc);
+            color: var(--ink);
         }
 
         .tag.b {
@@ -1210,6 +1210,11 @@
             margin-top: 12px;
         }
 
+        #v-prompts textarea,
+        #v-llm-logs .term {
+            width: 100%;
+        }
+
         /* Control bar container */
         .table-controls {
             display: flex;
@@ -1771,6 +1776,21 @@
                 </svg>
                 Raw files
                 <span class="nbadge" id="rbadge">—</span>
+            </div>
+            <span class="ns">LLM</span>
+            <div class="nl" onclick="nav('prompts',this)">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+                    <path d="M3 3h10v10H3z" />
+                    <path d="M5 6h6M5 8h6M5 10h4" />
+                </svg>
+                Prompts
+            </div>
+            <div class="nl" onclick="nav('llm-logs',this)">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+                    <path d="M3 3h10v10H3z" />
+                    <path d="M5 5h6M5 8h6M5 11h3" />
+                </svg>
+                LLM logs
             </div>
             <span class="ns">Pipeline</span>
             <div class="nl" onclick="nav('pipe',this)">
@@ -2513,6 +2533,65 @@
                 </div>
             </div>
 
+            <div class="view" id="v-prompts">
+                <div class="ph">
+                    <div>
+                        <div class="pt">Prompt <em>management</em></div>
+                        <div class="pm">View, update, activate, and create prompts</div>
+                    </div>
+                    <button class="btn btn-k" onclick="openCreatePromptModal()">+ New prompt</button>
+                </div>
+
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Version</th>
+                                <th>Active</th>
+                                <th>Updated</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="prompt-tb">
+                            <tr>
+                                <td colspan="6" class="muted"><span class="spin"></span> Loading…</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="view" id="v-llm-logs">
+                <div class="ph">
+                    <div>
+                        <div class="pt">LLM <em>logs</em></div>
+                        <div class="pm">Past submissions and live payload simulations</div>
+                    </div>
+                    <button class="btn" onclick="loadLLMLogs()">↻ Refresh</button>
+                </div>
+
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Meeting ID</th>
+                                <th>Provider</th>
+                                <th>Model</th>
+                                <th>Duration</th>
+                                <th>Created</th>
+                            </tr>
+                        </thead>
+                        <tbody id="llm-log-tb">
+                            <tr>
+                                <td colspan="6" class="muted"><span class="spin"></span> Loading…</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -3004,6 +3083,8 @@
             if (v === 'meetings') loadMeetings();
             if (v === 'raw') loadRaw();
             if (v === 'jobs') loadJobs();
+            if (v === 'prompts') loadPrompts();
+            if (v === 'llm-logs') loadLLMLogs();
         }
 
         // analytics
@@ -4316,7 +4397,222 @@
                 updateDinpLabel();
             });
         }
+        /*Prompts**/
+        async function loadPrompts() {
+            $('prompt-tb').innerHTML = `<tr><td colspan="6" class="muted"><span class="spin"></span> Loading…</td></tr>`;
+            const d = await GET('/api/prompts');
 
+            $('prompt-tb').innerHTML = d.items.map(p => `
+                <tr>
+                    <td>${p.id}</td>
+                    <td>${escapeHtml(p.name)}</td>
+                    <td>${escapeHtml(p.version)}</td>
+                    <td><span class="tag ${p.is_active ? 't' : 'b'}">${p.is_active ? 'active' : 'inactive'}</span></td>
+                    <td>${fmt(p.updated_at)}</td>
+                    <td>
+                        <div class="bg">
+                            <button class="btn" onclick="openPromptModal(${p.id})">View / Edit</button>
+                            ${!p.is_active ? `<button class="btn btn-t" onclick="activatePrompt(${p.id})">Activate</button>` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `).join('') || `<tr><td colspan="6" class="muted">No prompts found</td></tr>`;
+        }
+
+        async function openPromptModal(id) {
+            $('ov').classList.add('open');
+            $('mh').textContent = `Prompt ${id}`;
+            $('md').textContent = 'Loading…';
+            $('mbody').innerHTML = `<div style="padding:32px;text-align:center"><span class="spin"></span></div>`;
+
+            const p = await GET(`/api/prompts/${id}`);
+
+            $('mh').textContent = p.name;
+            $('md').textContent = `v${p.version} · ${p.is_active ? 'active' : 'inactive'}`;
+            $('mbody').innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:12px">
+            <label>
+                <div class="slabel">Name</div>
+                <input id="prompt-edit-name" value="${escapeHtml(p.name)}"
+                    style="width:100%;padding:10px 12px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink)" />
+            </label>
+
+            <label>
+                <div class="slabel">Version</div>
+                <input id="prompt-edit-version" value="${escapeHtml(p.version)}"
+                    style="width:100%;padding:10px 12px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink)" />
+            </label>
+
+            <label>
+                <div class="slabel">Prompt text</div>
+                <textarea id="prompt-edit-text"
+                    style="width:100%;min-height:320px;padding:12px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);font:12px/1.6 monospace">${escapeHtml(p.text)}</textarea>
+            </label>
+
+            <label style="display:flex;align-items:center;gap:8px">
+                <input id="prompt-edit-active" type="checkbox" ${p.is_active ? 'checked' : ''} />
+                <span>Set as active</span>
+            </label>
+
+            <div class="bg">
+                <button class="btn btn-k" onclick="savePrompt(${p.id})">Save</button>
+                ${!p.is_active ? `<button class="btn btn-t" onclick="activatePrompt(${p.id})">Activate</button>` : ''}
+            </div>
+        </div>
+    `;
+        }
+
+        async function savePrompt(id) {
+            const res = await fetch(`/api/prompts/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: $('prompt-edit-name').value.trim(),
+                    version: $('prompt-edit-version').value.trim(),
+                    text: $('prompt-edit-text').value,
+                    is_active: $('prompt-edit-active').checked
+                })
+            });
+
+            if (!res.ok) throw new Error(await res.text());
+
+            toast('Prompt updated', 's');
+            closeModal();
+            await loadPrompts();
+        }
+
+        function openCreatePromptModal() {
+            $('ov').classList.add('open');
+            $('ov').style.display='flex';
+            $('mh').textContent = 'Create prompt';
+            $('md').textContent = 'Create new prompt version';
+            $('mbody').innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:12px">
+            <label>
+                <div class="slabel">Name</div>
+                <input id="prompt-new-name" value="summarize_meeting"
+                    style="width:100%;padding:10px 12px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink)" />
+            </label>
+
+            <label>
+                <div class="slabel">Version</div>
+                <input id="prompt-new-version" value="1.0"
+                    style="width:100%;padding:10px 12px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink)" />
+            </label>
+
+            <label>
+                <div class="slabel">Prompt text</div>
+                <textarea id="prompt-new-text"
+                    style="width:100%;min-height:320px;padding:12px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);font:12px/1.6 monospace"></textarea>
+            </label>
+
+            <label style="display:flex;align-items:center;gap:8px">
+                <input id="prompt-new-active" type="checkbox" checked />
+                <span>Make active</span>
+            </label>
+
+            <div class="bg">
+                <button class="btn btn-k" onclick="createPrompt()">Create</button>
+            </div>
+        </div>
+    `;
+        }
+
+        async function createPrompt() {
+            const res = await fetch('/api/prompts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: $('prompt-new-name').value.trim(),
+                    version: $('prompt-new-version').value.trim(),
+                    text: $('prompt-new-text').value,
+                    is_active: $('prompt-new-active').checked
+                })
+            });
+
+            if (!res.ok) throw new Error(await res.text());
+
+            toast('Prompt created', 's');
+            closeModal();
+            await loadPrompts();
+        }
+
+        async function activatePrompt(id) {
+            const res = await fetch(`/api/prompts/${id}/activate`, { method: 'POST' });
+            if (!res.ok) throw new Error(await res.text());
+
+            toast('Prompt activated', 's');
+            closeModal();
+            await loadPrompts();
+        }
+
+        async function loadLLMLogs() {
+            $('llm-log-tb').innerHTML = `<tr><td colspan="6" class="muted"><span class="spin"></span> Loading…</td></tr>`;
+            const d = await GET('/api/llm-logs?limit=100');
+
+            $('llm-log-tb').innerHTML = d.items.map(x => `
+        <tr onclick="openLLMLog(${x.id})">
+            <td>${x.id}</td>
+            <td style="font-family:monospace;font-size:11px;color:var(--tc)">${escapeHtml(x.meeting_id)}</td>
+            <td>${escapeHtml(x.provider)}</td>
+            <td>${escapeHtml(x.model)}</td>
+            <td>${x.duration_sec ? x.duration_sec.toFixed(2) + 's' : '—'}</td>
+            <td>${fmt(x.created_at)}</td>
+        </tr>
+    `).join('') || `<tr><td colspan="6" class="muted">No LLM logs yet</td></tr>`;
+        }
+
+        async function openLLMLog(id) {
+            $('ov').classList.add('open');
+            $('ov').style.display = 'flex';
+            $('mh').textContent = `LLM log ${id}`;
+            $('md').textContent = 'Loading…';
+            $('mbody').innerHTML = `<div style="padding:32px;text-align:center"><span class="spin"></span></div>`;
+
+            const d = await GET(`/api/llm-logs/${id}`);
+            const x = d.log;
+            const sim = d.simulation || {};
+            const variants = sim.variants || [];
+
+            $('mh').textContent = `LLM log ${x.id}`;
+            $('md').textContent = `${x.provider} / ${x.model}`;
+
+            $('mbody').innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <span class="tag b">Prompt ID: ${x.prompt_id}</span>
+                <span class="tag p">${escapeHtml(x.provider)}</span>
+                <span class="tag t">${escapeHtml(x.model)}</span>
+                <span class="tag a">${x.duration_sec ? x.duration_sec.toFixed(2) + 's' : '—'}</span>
+            </div>
+
+            <div class="kv"><div class="kv-l">Meeting ID</div><div class="kv-v" style="font-family:monospace">${escapeHtml(x.meeting_id)}</div></div>
+            <div class="kv"><div class="kv-l">Data hash</div><div class="kv-v" style="font-family:monospace;word-break:break-all">${escapeHtml(x.data_hash)}</div></div>
+
+            <div class="slabel">Stored response</div>
+            <div class="term" style="max-height:220px">${escapeHtml(x.response || 'No response stored')}</div>
+
+            <div class="slabel">Live payload simulation</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+                ${variants.map(v => `
+                    <div style="border:1px solid var(--rule);border-radius:8px;padding:12px;background:var(--paper)">
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+                            <span class="tag t">${escapeHtml(v.label)}</span>
+                            <span class="tag b">${v.final_tokens} tokens</span>
+                            <span class="tag p">${v.final_chars} chars</span>
+                            <span class="tag a">${v.reduction_vs_all_percent ?? 0}% saved</span>
+                        </div>
+                        <div style="font-size:11px;color:var(--ink3);margin-bottom:8px">
+                            Sources: ${(v.included_sources || []).join(', ') || 'none'}
+                        </div>
+                        <div class="term" style="max-height:180px">${escapeHtml(v.preview || '')}</div>
+                    </div>
+                `).join('') || `<div class="muted">No simulation available</div>`}
+            </div>
+        </div>
+    `;
+        }
+        
         async function route() {
             const hash = location.hash.slice(1) || 'dash';
 
@@ -4333,8 +4629,10 @@
                 'dash': 0,
                 'meetings': 1,
                 'raw': 2,
-                'pipe': 3,
-                'jobs': 4,
+                'prompts': 3,
+                'llm-logs': 4,
+                'pipe': 5,
+                'jobs': 6,
             };
             const idx = navMap[hash] ?? 0;
             nav(hash, document.querySelectorAll('.nl')[idx]);

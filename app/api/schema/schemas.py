@@ -233,3 +233,68 @@ class SummaryPayloadSimulationResponse(BaseModel):
     prompt_name: str
     prompt_version: str
     variants: list[SummaryPayloadVariantResponse]
+    
+# ── Prompts ───────────────────────────────────────────────────────────────
+
+class PromptResponse(BaseModel):
+    id: int
+    name: str
+    version: str
+    text: str
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+
+
+class PromptListResponse(BaseModel):
+    items: list[PromptResponse]
+
+
+class PromptCreateRequest(BaseModel):
+    name: str
+    version: str = "1.0"
+    text: str
+    is_active: bool = True
+
+
+class PromptUpdateRequest(BaseModel):
+    name: Optional[str] = None
+    version: Optional[str] = None
+    text: Optional[str] = None
+    is_active: Optional[bool] = None
+
+
+# ── LLM logs ──────────────────────────────────────────────────────────────
+
+class LLMRequestLogSavedResponse(BaseModel):
+    id: int
+    prompt_id: int
+    meeting_id: str
+    provider: str
+    model: str
+    data_hash: str
+    response: Optional[str] = None
+    duration_sec: Optional[float] = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class LLMRequestLogListResponse(BaseModel):
+    items: list[LLMRequestLogSavedResponse]
+
+
+class LLMLogSimulationVariantResponse(BaseModel):
+    key: str
+    label: str
+    included_sources: list[str]
+    payload_chars: int
+    payload_tokens: int
+    final_chars: int
+    final_tokens: int
+    reduction_vs_all_percent: float | None = None
+    preview: str
+
+
+class LLMRequestLogDetailResponse(BaseModel):
+    log: LLMRequestLogSavedResponse
+    simulation: dict[str, Any]
