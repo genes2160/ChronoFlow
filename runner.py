@@ -27,14 +27,27 @@ def normalize(files):
     return output
 
 
-def main():
+def main(target_date: str | None = None):
     log("scan", "Starting ChronoFlow pipeline")
 
     tracker = load_tracker()
 
     files = scan_files()
-
     normalized = normalize(files)
+
+    if target_date and target_date != "__all__":
+        before_count = len(normalized)
+        normalized = [
+            f for f in normalized
+            if f.get("date") and f["date"].strftime("%Y-%m-%d") == target_date
+        ]
+        log(
+            "filter",
+            f"Scoped organize by date={target_date} "
+            f"→ kept {len(normalized)} of {before_count} files"
+        )
+    else:
+        log("filter", "Organize scope = all dates")
 
     organized = organize(normalized)
 
@@ -42,8 +55,11 @@ def main():
 
     save_tracker(tracker)
 
-    log("success", f"Scanned {len(files)} files, Pipeline complete; {statuses}")
-    
+    log(
+        "success",
+        f"Scanned {len(files)} raw files, organized {len(organized)}, Pipeline complete; {statuses}"
+    )
+
     return statuses
 
 

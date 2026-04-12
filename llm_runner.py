@@ -9,7 +9,7 @@ from app.llm.base import estimate_tokens, choose_provider_by_size
 from sqlmodel import select
 
 from app.api.core.db import get_session
-from app.api.models.model import LLMRequestLog, Meeting, Prompt, TranscriptTurn, Caption
+from app.api.models.model import LLMRequestLog, MediaTranscriptionJob, MediaTranscriptionStatus, Meeting, Prompt, TranscriptTurn, Caption
 from app.api.utils.prompt_config import get_data_hash
 from app.utils import log
 from app.llm.manager import get_llm

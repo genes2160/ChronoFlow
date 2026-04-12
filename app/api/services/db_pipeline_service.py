@@ -18,7 +18,7 @@ from app.api.schema.schemas import (
     PipelineStatus, PipelineStatusResponse, PipelineRunResponse
 )
 from app.api.models.model import (
-    Job, PipelineStatusEnum,
+    Job, MediaTranscriptionJob, MediaTranscriptionStatus, PipelineStatusEnum,
     Meeting, Summary, ParticipantScore,
     TranscriptTurn, Caption, MediaFile
 )
@@ -89,15 +89,34 @@ def _update_job(job_id: str, **kwargs) -> None:
 
 # ── Public API — mirrors pipeline_service.py exactly ──────────────────────
 
-async def trigger_organize(force: bool = False) -> PipelineRunResponse:
+async def trigger_organize(
+    force: bool = False,
+    target_date: str | None = None,
+) -> PipelineRunResponse:
     job = _new_job("organize")
 
     async def _run():
         try:
             from runner import main as run_organize
-            from app.api.services.migration_runner import run_backfill
-            statuses = await asyncio.to_thread(run_organize)
-            await asyncio.to_thread(run_backfill) # one-time backfill for pre-pipeline data; can be removed after a few runs
+            from app.api.services.migration_runner import (
+                run_backfill,
+                run_backfill_for_folders,
+            )
+
+            # statuses = await asyncio.to_thread(run_organize)
+            effective_date = target_date if target_date == "__all__" else (
+                target_date or datetime.utcnow().strftime("%Y-%m-%d")
+            )
+
+            statuses = await asyncio.to_thread(run_organize, effective_date)
+
+            if effective_date == "__all__":
+                print("🌍 trigger_organize full backfill -> all folders")
+                await asyncio.to_thread(run_backfill)
+            else:
+                print(f"🎯 trigger_organize scoped backfill -> target_date={effective_date}")
+                await asyncio.to_thread(run_backfill_for_folders, [effective_date])
+            # one-time backfill for pre-pipeline data; can be removed after a few runs
             _update_job(
                 job.job_id,
                 status=PipelineStatus.completed,
@@ -134,6 +153,7 @@ async def get_transcripts():
     
 async def trigger_summarize(
     meeting_ids: Optional[list[str]] = None,
+    source_preference: str = "caption",
 ) -> PipelineRunResponse:
     job = _new_job("summarize")
 
@@ -151,28 +171,51 @@ async def trigger_summarize(
 
             for meeting in meetings:
                 with get_session() as session:
-                    # Try captions first
                     captions = session.exec(
                         select(Caption)
                         .where(Caption.meeting_id == meeting.id)
                         .order_by(Caption.ts)
                     ).all()
 
-                    if captions:
+                    turns = session.exec(
+                        select(TranscriptTurn)
+                        .where(TranscriptTurn.meeting_id == meeting.id)
+                        .order_by(TranscriptTurn.turn_id)
+                    ).all()
+                    # 2️⃣ Attach completed media transcription if available
+                    media_transcriptions = session.exec(
+                        select(MediaTranscriptionJob).where(
+                            MediaTranscriptionJob.meeting_id == meeting.id,
+                            MediaTranscriptionJob.status == MediaTranscriptionStatus.completed,
+                        ).order_by(MediaTranscriptionJob.completed_at.desc())
+                    ).all()
+
+                    data = None
+
+                    prefer_transcript = source_preference == "transcript"
+                    both = source_preference == "both"
+
+                    if both:
                         data = {
+                            "transcripts": [
+                                {
+                                    "id": t.turn_id,
+                                    "speaker": t.speaker,
+                                    "text": t.text,
+                                    "timestamp": t.timestamp,
+                                    "relativeTime": t.relative_time,
+                                    "confidence": t.confidence,
+                                    "wordCount": t.word_count,
+                                }
+                                for t in turns
+                            ],
                             "captions": [
                                 {"speaker": c.speaker, "text": c.text, "ts": c.ts}
                                 for c in captions
                             ]
                         }
-                    else:
-                        # fallback to transcript turns
-                        turns = session.exec(
-                            select(TranscriptTurn)
-                            .where(TranscriptTurn.meeting_id == meeting.id)
-                            .order_by(TranscriptTurn.turn_id)
-                        ).all()
-
+                        
+                    elif prefer_transcript:
                         if turns:
                             data = {
                                 "transcripts": [
@@ -188,11 +231,63 @@ async def trigger_summarize(
                                     for t in turns
                                 ]
                             }
-                        else:
-                            # nothing to process
-                            output += f"\n⚠ {meeting.meeting_id} → No captions or transcript"
-                            continue
+                        elif captions:
+                            data = {
+                                "captions": [
+                                    {"speaker": c.speaker, "text": c.text, "ts": c.ts}
+                                    for c in captions
+                                ]
+                            }
+                    else:
+                        if captions:
+                            data = {
+                                "captions": [
+                                    {"speaker": c.speaker, "text": c.text, "ts": c.ts}
+                                    for c in captions
+                                ]
+                            }
+                        elif turns:
+                            data = {
+                                "transcripts": [
+                                    {
+                                        "id": t.turn_id,
+                                        "speaker": t.speaker,
+                                        "text": t.text,
+                                        "timestamp": t.timestamp,
+                                        "relativeTime": t.relative_time,
+                                        "confidence": t.confidence,
+                                        "wordCount": t.word_count,
+                                    }
+                                    for t in turns
+                                ]
+                            }
+                    if not data:
+                        output += f"\n⚠ {meeting.meeting_id} → No captions or transcript"
+                        continue
 
+
+                    data["media_transcriptions"] = [
+                        {
+                            "id": mt.id,
+                            "source_filename": mt.source_filename,
+                            "source_file_type": mt.source_file_type,
+                            "provider": mt.provider,
+                            "transcript_text": mt.transcript_text,
+                            # "raw_response": mt.raw_response,
+                            "completed_at": mt.completed_at.isoformat() if mt.completed_at else None,
+                        }
+                        for mt in media_transcriptions
+                        if mt.transcript_text
+                    ]
+
+                    print(
+                        "llm",
+                        f"🎙 Added {len(data['media_transcriptions'])} completed media transcription(s) to LLM payload for {meeting.meeting_id}"
+                    )
+                    
+
+                chosen_source = "transcripts" if "transcripts" in data else "captions"
+                print("llm", f"🧾 {meeting.meeting_id} using {chosen_source} | preference={source_preference}")
                 # Run LLM in a thread to avoid blocking
                 error = await run_llm_on_data(meeting.meeting_id, meeting.date, data)
                 if isinstance(error, dict):

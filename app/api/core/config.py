@@ -1,6 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
-
+import os
 
 class Settings(BaseSettings):
     APP_NAME: str = "ChronoFlow"
@@ -31,6 +31,12 @@ class Settings(BaseSettings):
     CELERY_BROKER_URL: str = "redis://redis:6379/0"
     CELERY_RESULT_BACKEND: str = "redis://redis:6379/0"
 
+
+    WHISPER_SERVICE_URL: str = ""
+    WHISPER_CALLBACK_BASE_URL: str = ""
+    MEDIA_TMP_DIR: Path = Path("data/tmp_media")
+
+
     @property
     def DATABASE_URL(self) -> str:
         if self.ENV in ["poc", "local"]:
@@ -50,3 +56,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+settings.MEDIA_TMP_DIR.mkdir(parents=True, exist_ok=True)

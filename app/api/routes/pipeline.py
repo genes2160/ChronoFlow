@@ -2,11 +2,12 @@
 ChronoFlow — /api/pipeline routes
 """
 
+from app.api.services.payload_simulation_service import simulate_summary_payload
 from fastapi import APIRouter, HTTPException
 from typing import List
 
 from app.api.schema.schemas import (
-    PipelineRunRequest, PipelineRunResponse, PipelineStatusResponse
+    PipelineRunRequest, PipelineRunResponse, PipelineStatusResponse, SummaryPayloadSimulationRequest, SummaryPayloadSimulationResponse
 )
 from app.api.services import pipeline_service
 from app.api.services import db_pipeline_service
@@ -29,10 +30,13 @@ async def run_pipeline(req: PipelineRunRequest):
     """
     if req.mode == "organize":
         # return await pipeline_service.trigger_organize(force=req.force)
-        return await db_pipeline_service.trigger_organize(force=req.force)
+        return await db_pipeline_service.trigger_organize(force=req.force, target_date=req.target_date)
     elif req.mode == "summarize":
         # return await pipeline_service.trigger_summarize(target_date=req.target_date, file_paths=req.file_paths, target_file=req.file_path)
-        return await db_pipeline_service.trigger_summarize(meeting_ids=req.meeting_ids)
+        return await db_pipeline_service.trigger_summarize(
+            meeting_ids=req.meeting_ids,
+            source_preference=req.source_preference or "caption"
+        )
     elif req.mode == "full":
         # return await db_pipeline_service.trigger_full(target_date=req.target_date, file_paths=req.file_paths)
         return await pipeline_service.trigger_full(target_date=req.target_date, file_paths=req.file_paths)
@@ -53,3 +57,16 @@ def get_job(job_id: str):
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     return job
+
+@router.post(
+    "/simulate-summary-payload",
+    response_model=SummaryPayloadSimulationResponse,
+    summary="Simulate summary payload without sending to LLM",
+)
+async def simulate_summary_payload_endpoint(req: SummaryPayloadSimulationRequest):
+    try:
+        return simulate_summary_payload(req)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

@@ -17,11 +17,11 @@ from app.api.models.model import (
 
 # Replace the strict regex with one that accepts both formats
 _MEETING_ID_RE = re.compile(
-    r'^[a-z]{3}-[a-z]{4}-[a-z]{3}$'   # hrp-axdm-gqm
-    r'|^Meet[_–-].+'                    # Meet_Team_Sync
-    r'|^mem-[a-f0-9]{8}$'              # mem-0bb62959 (memory files)
-    r'|^ts-[a-f0-9]{8}$'               # ts-a3f9b2c1 (timestamp files)
-    r'|^unk-[a-f0-9]{8}$'              # unk-xxxxxxxx (unknown fallback)
+    r'^[a-z]{3}-[a-z]{4}-[a-z]{3}(?:-\d{4}-\d{2}-\d{2})?$'   # hrp-axdm-gqm or hrp-axdm-gqm-2026-03-20
+    r'|^Meet[_–-].+(?:-\d{4}-\d{2}-\d{2})?$'                 # Meet_Team_Sync or Meet_Team_Sync-2026-03-20
+    r'|^mem-[a-f0-9]{8}(?:-\d{4}-\d{2}-\d{2})?$'             # mem-0bb62959 or mem-0bb62959-2026-03-20
+    r'|^ts-[a-f0-9]{8}(?:-\d{4}-\d{2}-\d{2})?$'              # ts-a3f9b2c1 or ts-a3f9b2c1-2026-03-20
+    r'|^unk-[a-f0-9]{8}(?:-\d{4}-\d{2}-\d{2})?$'             # unk-xxxxxxxx or unk-xxxxxxxx-2026-03-20
 )
 
 # NEW: add near helpers in migration_service.py
@@ -481,39 +481,21 @@ def migrate_captions_and_transcripts(session: Session, meeting: Meeting, raw: di
         pass
 
 # ── 6. MediaFile ──────────────────────────────────────────────────────────
-
 def migrate_media_file(
     session: Session,
     meeting: Meeting,
     filepath: Path,
     file_type: FileTypeEnum,
 ) -> None:
-    # Guard: file record already exists
-    if session.exec(
-        select(MediaFile).where(
-            MediaFile.meeting_id == meeting.id,
-            MediaFile.filename == filepath.name,
-        )
-    ).first():
-        return  # ← already exists, nothing to do
-
-    stat = filepath.stat() if filepath.exists() else None
-    session.add(MediaFile(
-        meeting_id=meeting.id,
-        filename=filepath.name,
-        file_type=file_type,
-        size_bytes=stat.st_size if stat else None,
-        storage_url=str(filepath.resolve()),
-        storage_backend="local",
-        uploaded_by=None,
-    ))
+    migrate_file_record(session, meeting, filepath, file_type)
 
     if file_type == FileTypeEnum.audio:
         meeting.has_audio = True
     elif file_type == FileTypeEnum.video:
         meeting.has_video = True
-    session.add(meeting)
 
+    session.add(meeting)
+    
 
 # ── Helpers ───────────────────────────────────────────────────────────────
 def update_meeting_from_raw(meeting: Meeting, raw: dict):
@@ -653,8 +635,13 @@ def migrate_memory_file(
 
     # Deterministic anchor from first file in the grouped batch
     anchor = filepaths[0]
-    meeting_id = _generate_mem_meeting_id(anchor.name)
-    print(f"🪪 memory anchor={anchor.name} → meeting_id={meeting_id}")
+    base_meeting_id = _generate_mem_meeting_id(anchor.name)
+    meeting_id = f"{base_meeting_id}-{date}"
+    print(
+        f"🪪 memory anchor={anchor.name} "
+        f"→ base_meeting_id={base_meeting_id} "
+        f"→ dated_meeting_id={meeting_id}"
+    )
 
     existing = session.exec(
         select(Meeting).where(Meeting.meeting_id == meeting_id)
@@ -760,6 +747,42 @@ def migrate_memory_file(
 
     return meeting
 
+def migrate_file_record(
+    session: Session,
+    meeting: Meeting,
+    filepath: Path,
+    file_type: FileTypeEnum,
+) -> None:
+    """
+    Catalog any source file (summary / captions / transcript / audio / video)
+    into the meeting file inventory table.
+
+    Safe to re-run.
+    """
+    if session.exec(
+        select(MediaFile).where(
+            MediaFile.meeting_id == meeting.id,
+            MediaFile.filename == filepath.name,
+        )
+    ).first():
+        print(f"⏭ file record already exists -> {filepath.name}")
+        return
+
+    stat = filepath.stat() if filepath.exists() else None
+
+    session.add(MediaFile(
+        meeting_id=meeting.id,
+        filename=filepath.name,
+        file_type=file_type,
+        size_bytes=stat.st_size if stat else None,
+        storage_url=str(filepath.resolve()),
+        storage_backend="local",
+        uploaded_by=None,
+    ))
+
+    print(f"📎 catalogued file record -> {filepath.name} ({file_type})")
+    
+
 # ── Orchestrator ──────────────────────────────────────────────────────────
 
 def migrate_meeting_folder(
@@ -774,12 +797,18 @@ def migrate_meeting_folder(
 ) -> Meeting | None:
     print(f"📁 migrate_meeting_folder → meeting_id={meeting_id}, date={date}")
 
-    meeting = upsert_meeting(session, meeting_id, date)
+    dated_meeting_id = f"{meeting_id}-{date}"
+    print(f"🪪 dated_meeting_id={dated_meeting_id}")
+    
+    meeting = upsert_meeting(session, dated_meeting_id, date)
     if not meeting:
-        print(f"❌ upsert_meeting failed for meeting_id={meeting_id}")
+        print(f"❌ upsert_meeting failed for meeting_id={dated_meeting_id}")
         return None
 
-    print(f"✅ Meeting record ready → DB id={meeting.id}")
+    print(
+        f"✅ Meeting record ready "
+        f"→ db_pk={meeting.id} | meeting_code={meeting.meeting_id}"
+    )
 
     # NEW: normalize possible one-or-many inputs
     summary_items = _dedupe_and_sort_file_payloads(summary_json)
@@ -787,29 +816,38 @@ def migrate_meeting_folder(
     transcript_items = _dedupe_and_sort_file_payloads(transcript_json)
     caption_items = _dedupe_and_sort_file_payloads(captions_json)
 
-    for _, raw in summary_items:
+    for path, raw in summary_items:
         if raw:
             print(f"🧠 Migrating summary for meeting {meeting.id}")
             migrate_summary(session, meeting, raw)
+            if path:
+                migrate_file_record(session, meeting, path, FileTypeEnum.summary)
 
-    for _, raw in cat_items:
+    for path, raw in cat_items:
         if raw:
             print(f"📝 Migrating captions_and_transcripts for meeting {meeting.id}")
             migrate_captions_and_transcripts(session, meeting, raw)
+            if path:
+                # catalog as transcript inventory, since this combined file carries transcript/caption content
+                migrate_file_record(session, meeting, path, FileTypeEnum.transcript)
 
-    for _, raw in transcript_items:
+    for path, raw in transcript_items:
         if raw:
             print(f"📜 Migrating transcript_json for meeting {meeting.id}")
             migrate_transcript(session, meeting, raw)
+            if path:
+                migrate_file_record(session, meeting, path, FileTypeEnum.transcript)
 
-    for _, raw in caption_items:
+    for path, raw in caption_items:
         if raw is not None:
             print(f"💬 Migrating captions_json for meeting {meeting.id}")
             migrate_captions(session, meeting, raw)
+            if path:
+                migrate_file_record(session, meeting, path, FileTypeEnum.captions)
 
     for path, ftype in (media_files or []):
         print(f"🎥 Migrating media file for meeting {meeting.id} → {path} ({ftype})")
         migrate_media_file(session, meeting, path, ftype)
 
-    print(f"🏁 Finished migrate_meeting_folder → meeting {meeting.id}")
+    print(f"🏁 Finished migrate_meeting_folder → meeting {dated_meeting_id}")
     return meeting

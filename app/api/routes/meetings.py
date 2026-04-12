@@ -3,10 +3,11 @@ ChronoFlow — /api/meetings routes
 """
 
 from app.api.core.db import get_session
+from app.api.services.reconciliation_service import fix_missing_files_in_db, reconcile_organized_files_vs_db
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional
 from fastapi.responses import FileResponse
-from app.api.schema.schemas import MeetingsListResponse, MeetingDetailResponse, RawFilesResponse
+from app.api.schema.schemas import FileReconciliationResponse, MeetingsListResponse, MeetingDetailResponse, RawFilesResponse
 from app.api.services import meetings_service
 from app.api.services  import db_meetings_service
 from app.api.services  import db_participant_stats_service
@@ -47,6 +48,24 @@ def list_raw_files():
     return  db_meetings_service.get_raw_files()
     # return meetings_service.get_raw_files()
 
+@router.post(
+    "/reconcile/files/fix",
+    summary="Fix missing organized files in DB inventory and content",
+)
+def fix_reconciled_files(
+    target_date: str | None = Query(default=None, description="Optional date folder like 2026-04-08"),
+):
+    return fix_missing_files_in_db(target_date=target_date)
+
+@router.get(
+    "/reconcile/files",
+    response_model=FileReconciliationResponse,
+    summary="Compare organized folder files vs DB file inventory",
+)
+def reconcile_files(
+    target_date: str | None = Query(default=None, description="Optional date folder like 2026-03-20")
+):
+    return reconcile_organized_files_vs_db(target_date=target_date)
 
 @router.get("/{date}/{meeting_id}/captions", summary="Get captions for a meeting")
 def get_captions(date: str, meeting_id: str):
