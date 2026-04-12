@@ -1,7 +1,7 @@
 # app/api/models/base.py
 from datetime import datetime
 from typing import Optional
-from sqlmodel import SQLModel, Field, Column, DateTime, func, BigInteger, Float, String
+from sqlmodel import SQLModel, Field, Column, DateTime, func, BigInteger, Float, String, Text, Boolean
 from sqlalchemy import JSON, Enum,Index, UniqueConstraint
 from enum import Enum as PyEnum
 

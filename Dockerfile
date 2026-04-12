@@ -12,6 +12,9 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+# ✅ NEW: install ffmpeg
+RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
+
 # copy only the installed packages from builder
 COPY --from=builder /install /usr/local
 

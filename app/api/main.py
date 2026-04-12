@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import os
 
-from app.api.routes import meetings, pipeline, analytics
+from app.api.routes import media_transcription, meetings, pipeline, analytics, notifications
 from app.api.core.config import settings
 from app.api.core.logging import configure_logging
 from app.api.core.db import create_tables
@@ -54,6 +54,8 @@ app.add_middleware(
 app.include_router(meetings.router,  prefix="/api/meetings",  tags=["Meetings"])
 app.include_router(pipeline.router,  prefix="/api/pipeline",  tags=["Pipeline"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["Analytics"])
+app.include_router(media_transcription.router, prefix="/api/media-transcription", tags=["Media Transcription"])
+app.include_router(notifications.router, prefix="/api/notifications", tags=["notifications"])
 
 # Serve static dashboard
 static_dir = os.path.join(os.path.dirname(__file__), "static")

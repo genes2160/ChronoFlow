@@ -1,4 +1,6 @@
-from app.api.models.base import SQLModel, Optional, Field, datetime, JSON, Column, Enum, FileTypeEnum, PipelineStatusEnum, DateTime, func, BigInteger, Float, String,Index, UniqueConstraint
+from app.api.models.base import SQLModel, Optional, Field, datetime, JSON, Column, Enum, FileTypeEnum, PipelineStatusEnum, DateTime, func, BigInteger, Float, String,Index, UniqueConstraint, Text, Boolean
+import enum
+
 
 class User(SQLModel, table=True):
     __tablename__ = "users"
@@ -245,5 +247,81 @@ def captions_from_file(meeting_id: int, data: list, uploaded_by: Optional[int] =
         for c in data
     ]
 
+
+class MediaTranscriptionStatus(str, enum.Enum):
+    queued = "queued"
+    processing = "processing"
+    completed = "completed"
+    failed = "failed"
+
+
+class MediaTranscriptionJob(SQLModel, table=True):
+    __tablename__ = "media_transcription_jobs"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+
+    meeting_id: int = Field(foreign_key="meetings.id", index=True)
+    media_file_id: Optional[int] = Field(default=None, foreign_key="media_files.id", index=True)
+
+    source_filename: str = Field(index=True)
+    source_file_type: str = Field(default="audio", sa_column=Column(String, nullable=False))  # audio | video
+    submitted_audio_path: Optional[str] = Field(default=None, sa_column=Column(Text, nullable=True))
+    original_media_path: Optional[str] = Field(default=None, sa_column=Column(Text, nullable=True))
+
+    provider: str = Field(default="whisper", index=True)
+    external_job_id: Optional[str] = Field(default=None, index=True)
+    callback_token: str = Field(index=True)
+
+    status: MediaTranscriptionStatus = Field(
+        default=MediaTranscriptionStatus.queued,
+        sa_column=Column(Enum(MediaTranscriptionStatus), nullable=False, index=True)
+    )
+
+    transcript_text: Optional[str] = Field(default=None, sa_column=Column(Text, nullable=True))
+    raw_response: Optional[dict] = Field(default=None, sa_column=Column(JSON, nullable=True))
+    error: Optional[str] = Field(default=None, sa_column=Column(Text, nullable=True))
+
+    created_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        sa_column=Column(DateTime, server_default=func.now(), nullable=False)
+    )
+    updated_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        sa_column=Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    )
+    completed_at: Optional[datetime] = Field(
+        default=None,
+        sa_column=Column(DateTime, nullable=True)
+    )
     
-    
+
+class NotificationType(str, enum.Enum):
+    transcription = "transcription"
+
+
+class NotificationStatus(str, enum.Enum):
+    processing = "processing"
+    completed = "completed"
+    failed = "failed"
+
+
+class Notification(SQLModel, table=True):
+    __tablename__ = "notifications"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+
+    type: NotificationType = Field(sa_column=Column(String, nullable=False, index=True))
+    status: NotificationStatus = Field(sa_column=Column(String, nullable=False, index=True))
+
+    title: str = Field(sa_column=Column(String, nullable=False))
+    message: str = Field(sa_column=Column(Text, nullable=False))
+
+    meeting_id: Optional[int] = Field(default=None, foreign_key="meetings.id", index=True)
+    transcription_job_id: Optional[int] = Field(default=None, foreign_key="media_transcription_jobs.id", index=True)
+
+    is_read: bool = Field(default=False, sa_column=Column(Boolean, nullable=False, index=True))
+
+    created_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        sa_column=Column(DateTime, server_default=func.now(), nullable=False, index=True)
+    )

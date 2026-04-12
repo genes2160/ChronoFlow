@@ -1322,6 +1322,381 @@
             padding: 5px 5px;
         }
     </style>
+    <style id="mobile-compatible-version">
+        /* =========================
+   RESPONSIVE PATCH
+   mobile + tablet safe
+   add at very end of CSS
+   ========================= */
+
+        @media (max-width: 1024px) {
+            body {
+                height: auto;
+                min-height: 100vh;
+                overflow: auto;
+            }
+
+            .shell {
+                display: block;
+                height: auto;
+                min-height: 100vh;
+            }
+
+            .topbar {
+                padding: 12px 16px;
+                gap: 10px;
+                flex-wrap: wrap;
+                position: sticky;
+                top: 0;
+                z-index: 1000;
+            }
+
+            .topbar-r {
+                width: 100%;
+                margin-left: 0;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .sidebar {
+                border-right: none;
+                border-bottom: 1px solid var(--rule);
+                padding: 8px 10px;
+                flex-direction: row;
+                align-items: center;
+                gap: 8px;
+                overflow-x: auto;
+                overflow-y: hidden;
+                white-space: nowrap;
+            }
+
+            .ns {
+                display: none;
+            }
+
+            .nl {
+                border-left: none;
+                border-bottom: 2px solid transparent;
+                padding: 10px 12px;
+                border-radius: 8px;
+                flex: 0 0 auto;
+            }
+
+            .nl.on {
+                border-left-color: transparent;
+                border-bottom-color: var(--tm);
+            }
+
+            .main {
+                padding: 18px 14px 24px;
+                overflow: visible;
+            }
+
+            .ph {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                margin-bottom: 18px;
+                padding-bottom: 14px;
+            }
+
+            .pt {
+                font-size: 22px;
+            }
+
+            .strip {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .sc {
+                border-right: 1px solid var(--rule);
+                border-bottom: 1px solid var(--rule);
+            }
+
+            .sc:nth-child(2n) {
+                border-right: none;
+            }
+
+            .sc:nth-last-child(-n + 2) {
+                border-bottom: none;
+            }
+
+            .tc2,
+            .dg,
+            .score-grid,
+            .spk-meta {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                overflow-x: auto;
+            }
+
+            .ch {
+                padding: 12px 14px;
+                gap: 8px;
+            }
+
+            .ct {
+                font-size: 14px;
+            }
+
+            table {
+                min-width: 760px;
+            }
+
+            th,
+            td {
+                padding: 10px 12px;
+            }
+
+            .pc {
+                padding: 16px;
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .pn {
+                width: auto;
+                font-size: 24px;
+            }
+
+            .bg {
+                width: 100%;
+            }
+
+            .bg .btn,
+            .bg select,
+            .bg input,
+            .bg>div {
+                max-width: 100%;
+            }
+
+            .tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+                padding: 0 12px;
+            }
+
+            .tab {
+                flex: 0 0 auto;
+                padding: 10px 12px;
+            }
+
+            .kv {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .kv-l {
+                width: 100%;
+                padding-top: 0;
+            }
+
+            .wbar-row {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .wbar-name,
+            .wbar-val {
+                width: 100%;
+                text-align: left;
+            }
+
+            .cap-row {
+                grid-template-columns: 1fr;
+                gap: 4px;
+            }
+
+            .modal {
+                max-width: 100%;
+                max-height: 90vh;
+            }
+
+            .mt,
+            .mb {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            #notif-panel {
+                right: 12px !important;
+                left: 12px;
+                top: 64px !important;
+                width: auto !important;
+                max-width: none !important;
+            }
+
+            #det-media-nav {
+                flex-wrap: wrap;
+            }
+
+            #det-media-prev,
+            #det-media-next {
+                flex: 1 1 120px;
+            }
+
+            #det-media-actions {
+                flex-wrap: wrap;
+            }
+
+            .table-controls {
+                padding: 12px;
+                gap: 12px;
+            }
+
+            .control-group {
+                min-width: 160px;
+                flex: 1 1 160px;
+            }
+
+            .results-info {
+                width: 100%;
+                margin-left: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .topbar {
+                padding: 10px 12px;
+            }
+
+            .wordmark {
+                font-size: 18px;
+            }
+
+            .topbar-sub {
+                display: none;
+            }
+
+            .clock {
+                font-size: 11px;
+            }
+
+            .main {
+                padding: 14px 10px 20px;
+            }
+
+            .pt {
+                font-size: 20px;
+            }
+
+            .pm {
+                font-size: 11px;
+            }
+
+            .strip {
+                grid-template-columns: 1fr;
+            }
+
+            .sc {
+                border-right: none;
+                border-bottom: 1px solid var(--rule);
+            }
+
+            .sc:last-child {
+                border-bottom: none;
+            }
+
+            .btn {
+                padding: 8px 12px;
+                font-size: 11px;
+            }
+
+            .api-pill {
+                font-size: 10px;
+                padding: 4px 10px;
+            }
+
+            .table-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .control-group {
+                min-width: 100%;
+            }
+
+            .control-group input,
+            .control-group select,
+            #dinp-trigger,
+            #dinp {
+                width: 100% !important;
+            }
+
+            .tabs {
+                padding: 0 10px;
+            }
+
+            .prose {
+                padding: 14px 12px;
+            }
+
+            .dbv,
+            .sv {
+                font-size: 22px;
+            }
+
+            .term {
+                font-size: 10px;
+                padding: 12px;
+            }
+
+            .toasts {
+                right: 12px;
+                left: 12px;
+                bottom: 12px;
+            }
+
+            .toast {
+                max-width: none;
+            }
+
+            .ov {
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .topbar-r {
+                align-items: stretch;
+            }
+
+            .api-pill {
+                justify-content: center;
+            }
+
+            .nl {
+                font-size: 12px;
+                padding: 9px 10px;
+            }
+
+            .ch {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .mh {
+                font-size: 17px;
+            }
+
+            .db,
+            .seg,
+            .spk,
+            .q-item,
+            .score-cell {
+                padding: 10px;
+            }
+
+            th,
+            td {
+                padding: 9px 10px;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -1333,11 +1708,42 @@
             <div class="vdiv"></div>
             <div class="topbar-sub">Meeting intelligence</div>
             <div class="topbar-r">
+                <div id="notif-pill" class="api-pill" style="cursor:pointer;position:relative"
+                    onclick="toggleNotificationsPanel()">
+                    <span class="dot"></span>
+                    Notifications
+                    <span id="notif-count"
+                        style="display:none;margin-left:8px;min-width:18px;height:18px;padding:0 6px;border-radius:999px;background:var(--cc);color:#fff;font-size:11px;line-height:18px;text-align:center;font-weight:600">
+                        0
+                    </span>
+                </div>
+
                 <div class="api-pill"><span class="dot"></span> API online</div>
                 <div class="clock" id="clk">—</div>
             </div>
         </header>
+        <div id="notif-panel"
+            style="display:none;position:fixed;top:58px;right:24px;width:360px;max-width:calc(100vw - 32px);background:var(--paper);border:1px solid var(--rule);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.18);z-index:1200;overflow:hidden">
+            <div
+                style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--rule);gap:8px">
+                <div
+                    style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)">
+                    Notifications
+                </div>
+                <div style="display:flex;gap:8px;align-items:center">
+                    <button class="btn" style="padding:4px 8px;font-size:11px" onclick="markAllNotificationsRead()">Mark
+                        all
+                        read</button>
+                    <button class="btn" style="padding:4px 8px;font-size:11px"
+                        onclick="closeNotificationsPanel()">Close</button>
+                </div>
+            </div>
 
+            <div id="notif-panel-list"
+                style="max-height:360px;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px">
+                <div class="muted">No notifications yet</div>
+            </div>
+        </div>
         <!-- sidebar -->
         <nav class="sidebar">
             <span class="ns">Overview</span>
@@ -1561,7 +1967,8 @@
                         <div class="pt"><em>Raw</em> files</div>
                         <div class="pm">Unprocessed files in data/raw</div>
                     </div>
-                    <button class="btn btn-k" onclick="organizeRawFiles()">↓ Organize now</button>
+                    <!-- <button class="btn btn-k" onclick="organizeRawFiles()">↓ Organize now</button> -->
+                    <button class="btn btn-k" onclick="openOrganizeModal()">↓ Organize now</button>
                 </div>
                 <div class="card">
                     <table>
@@ -1772,6 +2179,20 @@
                                 </div>
                             </div>
                             <div style="margin-top:8px;font-size:11px;color:var(--ink3)" id="det-media-meta"></div>
+
+                            <!-- NEW: media navigator -->
+                            <div id="det-media-nav"
+                                style="display:none;margin-top:12px;align-items:center;justify-content:space-between;gap:10px">
+                                <button id="det-media-prev" class="btn" type="button">← Prev</button>
+                                <div id="det-media-index"
+                                    style="font-size:11px;color:var(--ink3);text-align:center;flex:1">1 / 1</div>
+                                <button id="det-media-next" class="btn" type="button">Next →</button>
+                            </div>
+                            <div id="det-media-actions"
+                                style="display:none;margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+                                <button id="det-transcribe-btn" class="btn btn-k" type="button">Transcribe this
+                                    media</button>
+                            </div>
                         </div>
                     </div>
 
@@ -1784,6 +2205,7 @@
                             <div class="tab" onclick="switchTab('summary',this)">Summary</div>
                             <div class="tab" onclick="switchTab('captions',this)">Captions</div>
                             <div class="tab" onclick="switchTab('transcripts',this)">Transcripts</div>
+                            <div class="tab" onclick="switchTab('whisper-transcript',this)">Whisper Transcript</div>
                         </div>
 
                         <!-- ── TAB: Overview ── -->
@@ -2048,6 +2470,45 @@
                             </div>
                         </div>
 
+                        <!-- ── TAB: Whisper Transcript ── -->
+                        <div class="tab-panel" id="tp-whisper-transcript">
+
+                            <!-- header / stats -->
+                            <div id="det-whisper-header"
+                                style="display:none;padding:16px 20px;border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+                                <div class="sc" style="margin:0;min-width:120px">
+                                    <div class="sl">Jobs</div>
+                                    <div class="sv" id="det-whisper-count">—</div>
+                                    <div class="ss">available</div>
+                                </div>
+                                <div class="sc" style="margin:0;min-width:120px">
+                                    <div class="sl">Completed</div>
+                                    <div class="sv" id="det-whisper-completed">—</div>
+                                    <div class="ss">ready</div>
+                                </div>
+                                <div style="margin-left:auto">
+                                    <input id="det-whisper-search" type="text" placeholder="Search whisper transcripts…"
+                                        style="font-family:var(--fd);font-size:12px;padding:7px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:220px" />
+                                </div>
+                            </div>
+
+                            <!-- loading -->
+                            <div id="det-whisper-loading" style="padding:48px;text-align:center;color:var(--ink3)">
+                                <span class="spin"></span> Loading Whisper transcripts…
+                            </div>
+
+                            <!-- empty state -->
+                            <div id="det-whisper-empty"
+                                style="display:none;padding:48px;text-align:center;color:var(--ink3)">
+                                No Whisper transcripts found for this meeting
+                            </div>
+
+                            <!-- list -->
+                            <div id="det-whisper-list"
+                                style="display:none;padding:16px 20px;flex-direction:column;gap:10px;max-height:600px;overflow-y:auto">
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -2071,6 +2532,17 @@
     <div id="confirm-modal" class="modal-cp hidden">
         <div class="modal-box">
             <p class="summary-modal-content">Generate summary for this item?</p>
+            <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+                <label style="font-size:12px;color:var(--ink2);font-weight:600">Use source</label>
+
+                <select id="summary-source-preference"
+                    style="font-family:var(--fd);font-size:12px;padding:8px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:100%">
+                    <option value="caption">Caption first</option>
+                    <option value="transcript">Transcript first</option>
+                    <option value="both">Both</option>
+                </select>
+            </div>
+
             <div class="actions">
                 <button id="confirm-yes" style="color:#fff" class="btn btn-t">Yes</button>
                 <button id="confirm-no" class="btn">Cancel</button>
@@ -2078,14 +2550,18 @@
         </div>
     </div>
     <div class="toasts" id="toasts"></div>
-
     <script>
         const $ = id => document.getElementById(id);
         let _all = [], _poll = null;
         // track where the user came from so Back works correctly
         let _detailOrigin = 'meetings';
-
+        let detTranscriptions = [];
         let pendingId = null;
+        let _notifPoll = null;
+        let _lastNotificationId = null;
+        let _notifAudioUnlocked = false;
+        let _unreadNotificationCount = 0;
+        const _baseDocumentTitle = document.title;
 
         const modal = document.getElementById('confirm-modal');
         const yesBtn = document.getElementById('confirm-yes');
@@ -2101,8 +2577,195 @@
             trigger.style.borderRadius = open ? '6px' : '6px 6px 0 0';
             trigger.style.borderBottom = open ? '' : '1px solid var(--rule2)';
         }
+        function unlockNotificationAudio() {
+            _notifAudioUnlocked = true;
+        }
+        function updateNotificationBadge(count) {
+            _unreadNotificationCount = count;
+
+            const badge = $('notif-count');
+            if (!badge) return;
+
+            if (count > 0) {
+                badge.style.display = 'inline-block';
+                badge.textContent = count > 99 ? '99+' : String(count);
+                document.title = `(${count}) ${_baseDocumentTitle}`;
+            } else {
+                badge.style.display = 'none';
+                badge.textContent = '0';
+                document.title = _baseDocumentTitle;
+            }
+        }
+        function toggleNotificationsPanel() {
+            const panel = $('notif-panel');
+            if (!panel) return;
+            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function closeNotificationsPanel() {
+            const panel = $('notif-panel');
+            if (!panel) return;
+            panel.style.display = 'none';
+        }
+
+        async function markAllNotificationsRead() {
+            try {
+                const res = await POST('/api/notifications/read-all', {});
+                console.log('🔔 marked all read', res);
+
+                updateNotificationBadge(0);
+                renderNotificationsPanel([]);
+                closeNotificationsPanel();
+
+                toast('Notifications marked as read', 's');
+
+                _lastNotificationId = null;
+                await pollNotifications();
+            } catch (e) {
+                console.error('❌ mark all notifications read failed', e);
+                toast(`Failed to mark notifications as read: ${e.message}`, 'e');
+            }
+        }
+
+        function renderNotificationsPanel(items) {
+            const box = $('notif-panel-list');
+            if (!box) return;
+
+            if (!items || !items.length) {
+                box.innerHTML = `<div class="muted">No notifications yet</div>`;
+                return;
+            }
+
+            box.innerHTML = items.map(n => {
+                const tone =
+                    n.status === 'completed' ? 't' :
+                        n.status === 'failed' ? 'a' : 'b';
+
+                return `
+                    <div style="border:1px solid var(--rule);border-radius:8px;padding:10px 12px;background:var(--paper)">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+                            <span class="tag ${tone}">${n.status || 'unknown'}</span>
+                            <span style="font-size:12px;font-weight:600;color:var(--ink2)">${escapeHtml(n.title || 'Notification')}</span>
+                            <span style="margin-left:auto;font-size:11px;color:var(--ink3)">${fmt(n.created_at)}</span>
+                        </div>
+                        <div style="font-size:12px;color:var(--ink2);line-height:1.5">${escapeHtml(n.message || '')}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        document.addEventListener('click', unlockNotificationAudio, { once: true });
+        document.addEventListener('keydown', unlockNotificationAudio, { once: true });
+        function playNotificationSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.value = 880; // clean notification tone
+                gain.gain.value = 0.08;
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start();
+
+                setTimeout(() => {
+                    osc.stop();
+                    ctx.close();
+                }, 3600);
+            } catch (e) {
+                console.warn('Audio failed', e);
+            }
+        }
+
+        function dplayNotificationSound() {
+            try {
+                const audio = $('notif-audio');
+                if (audio && _notifAudioUnlocked) {
+                    audio.currentTime = 0;
+                    audio.play().catch(() => { });
+                    return;
+                }
+            } catch (e) { }
+
+            // fallback beep
+            try {
+                if (!_notifAudioUnlocked) return;
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.value = 880;
+                gain.gain.value = 0.05;
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start();
+                setTimeout(() => {
+                    osc.stop();
+                    ctx.close();
+                }, 180);
+            } catch (e) { }
+        }
+
+        async function pollNotifications() {
+            try {
+                const res = await GET('/api/notifications?limit=20&unread_only=true');
+                const items = Array.isArray(res.items) ? res.items : [];
+
+                updateNotificationBadge(items.length);
+                renderNotificationsPanel(items);
+
+                if (!items.length) return;
+
+                const newest = items[0];
+
+                if (_lastNotificationId == null) {
+                    _lastNotificationId = newest.id;
+                    return;
+                }
+
+                const fresh = items.filter(n => n.id > _lastNotificationId);
+                if (!fresh.length) return;
+
+                _lastNotificationId = Math.max(...items.map(x => x.id));
+
+                fresh
+                    .sort((a, b) => a.id - b.id)
+                    .forEach(n => {
+                        const tone =
+                            n.status === 'failed' ? 'e' :
+                                n.status === 'completed' ? 's' : 'i';
+
+                        toast(`${n.title}: ${n.message}`, tone);
+                        playNotificationSound();
+                    });
+
+            } catch (e) {
+                console.error('❌ notification polling failed', e);
+            }
+        }
+
+        function startNotificationPolling() {
+            if (_notifPoll) clearInterval(_notifPoll);
+
+            pollNotifications();
+            _notifPoll = setInterval(pollNotifications, 5000);
+        }
 
         document.addEventListener('click', e => {
+            const panel = $('notif-panel');
+            const pill = $('notif-pill');
+            if (!panel || !pill) return;
+
+            if (!panel.contains(e.target) && !pill.contains(e.target)) {
+                panel.style.display = 'none';
+            }
             if (!e.target.closest('#dinp') && !e.target.closest('#dinp-trigger')) {
                 $('dinp').style.display = 'none';
                 $('dinp-trigger').style.borderRadius = '6px';
@@ -2210,24 +2873,31 @@
             const date = subEl?.textContent?.trim() ?? '';
             if (!id || !date) return;
 
-            // Load once
+            // Load captions/transcripts once
             if (!_captionsData.length && !_transcriptsData.length) {
                 const data = await fetchCaptionsAndTranscripts(id, date);
                 _captionsData = data.captions;
                 _transcriptsData = data.transcripts;
-                console.log(`Fetched ${data.captions?.length} captions and ${data.transcripts?.length} transcript entries from server`, data); // debug
+                console.log(`Fetched ${data.captions?.length} captions and ${data.transcripts?.length} transcript entries from server`, data);
             }
 
-            // Render depending on tab
             if (name === 'captions') {
                 renderCaptionsFromCache();
+                return;
             }
 
             if (name === 'transcripts') {
-                console.log("Rendering transcripts from cache", _transcriptsData); // debug
+                console.log("Rendering transcripts from cache", _transcriptsData);
                 renderTranscriptsFromCache();
+                return;
+            }
+
+            if (name === 'whisper-transcript') {
+                await loadMeetingTranscriptions(id, true);
+                return;
             }
         }
+
         function renderCaptionsFromCache() {
             const captions = _captionsData;
             if (!captions.length) return;
@@ -2509,6 +3179,145 @@
             </tr>`).join('');
         }
 
+        function getCurrentLocalDate() {
+            const d = new Date();
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function openOrganizeModal() {
+            const currentDate = getCurrentLocalDate();
+
+            const mh = $('mh');
+            const md = $('md');
+            const body = $('mbody');
+            const ov = $('ov');
+
+            mh.textContent = 'Organize raw files';
+            md.textContent = 'Choose how you want the organize + backfill step to run';
+
+            body.innerHTML = `
+                <div style="display:flex;flex-direction:column;gap:14px">
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                        <input type="radio" name="organize-scope" value="today" checked />
+                        <div>
+                            <div style="font-weight:600;color:var(--ink)">Today only</div>
+                            <div style="font-size:12px;color:var(--ink3)">Use current local date: ${currentDate}</div>
+                        </div>
+                    </label>
+
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                        <input type="radio" name="organize-scope" value="all" />
+                        <div>
+                            <div style="font-weight:600;color:var(--ink)">All folders</div>
+                            <div style="font-size:12px;color:var(--ink3)">Run backfill across every organized date folder</div>
+                        </div>
+                    </label>
+
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                        <input type="radio" name="organize-scope" value="one" />
+                        <div style="flex:1">
+                            <div style="font-weight:600;color:var(--ink)">Choose one date</div>
+                            <div style="font-size:12px;color:var(--ink3);margin-bottom:8px">Run backfill for one specific folder date</div>
+                            <input
+                                id="organize-target-date"
+                                type="date"
+                                value="${currentDate}"
+                                style="font-family:var(--fd);font-size:12px;padding:8px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);width:100%;max-width:220px"
+                            />
+                        </div>
+                    </label>
+
+                    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:6px">
+                        <button class="btn" onclick="closeModal()">Cancel</button>
+                        <button class="btn btn-k" onclick="submitOrganizeFromModal()">Run organize</button>
+                    </div>
+                </div>
+            `;
+
+            ov.style.display = 'flex';
+        }
+
+        async function submitOrganizeFromModal() {
+            const selected = document.querySelector('input[name="organize-scope"]:checked');
+            const pickedDate = $('organize-target-date')?.value || getCurrentLocalDate();
+
+            const panel = $('jpanel');
+            const term = $('jterm');
+            const title = $('jtitle');
+            const tag = $('jtag');
+
+            let payload = { mode: 'organize', force: true };
+            let label = 'today';
+
+            if (selected?.value === 'all') {
+                payload = { mode: 'organize', force: true, target_date: '__all__' };
+                label = 'all';
+            } else if (selected?.value === 'one') {
+                if (!pickedDate) {
+                    toast('Please choose a date', 'w');
+                    return;
+                }
+                payload = { mode: 'organize', force: true, target_date: pickedDate };
+                label = pickedDate;
+            } else {
+                payload = { mode: 'organize', force: true, target_date: getCurrentLocalDate() };
+                label = getCurrentLocalDate();
+            }
+
+            const ov = $('ov');
+            if (ov) {
+                ov.style.display = 'none';
+            }
+
+            panel.style.display = 'block';
+            title.textContent = `Organize — running (${label})`;
+            tag.className = 'tag a';
+            tag.textContent = 'running';
+            term.textContent = `Dispatching organize job for ${label}...`;
+
+            try {
+                const job = await POST('/api/pipeline/run', payload);
+
+                toast(`Organization job ${job.job_id} started`, 'i');
+                $('jmeta').innerHTML = `
+                    <span class="tag b">ID: ${job.job_id}</span>
+                    <span class="tag p">organize</span>
+                    <span class="tag t">${label}</span>
+                `;
+
+                const poll = setInterval(async () => {
+                    const s = await GET(`/api/pipeline/jobs/${job.job_id}`);
+                    term.textContent = s.output || s.error || '…waiting';
+                    term.scrollTop = term.scrollHeight;
+
+                    if (s.status === 'completed' || s.status === 'failed') {
+                        clearInterval(poll);
+
+                        const hasFailures = s.status === 'failed' || (s.output?.includes('❌'));
+                        tag.className = `tag ${hasFailures ? 'a' : 't'}`;
+                        tag.textContent = hasFailures ? 'partial' : 'completed';
+                        title.textContent = `Organize — ${hasFailures ? 'partial' : 'done'} (${label})`;
+
+                        toast(
+                            `Organization job ${job.job_id} ${hasFailures ? 'completed with errors' : 'completed'}`,
+                            hasFailures ? 'w' : 's'
+                        );
+                        if (hasFailures) {
+                            openJobResultModal(s, `Organize — completed with errors (${label})`);
+                        }
+                        loadRaw();
+                    }
+                }, 2000);
+
+            } catch (e) {
+                term.textContent = 'Error: ' + e.message;
+                toast('Organization failed: ' + e.message, 'e');
+            }
+        }
+
         async function organizeRawFiles() {
             const panel = $('jpanel'), term = $('jterm'), title = $('jtitle'), tag = $('jtag');
 
@@ -2553,9 +3362,18 @@
 
         function openConfirm(id, text) {
             pendingId = id;
-            if (text) {
-                document.querySelector(".summary-modal-content").textContent = text
+
+            const content = document.querySelector(".summary-modal-content");
+            const select = document.getElementById("summary-source-preference");
+
+            if (content) {
+                content.textContent = text || "Generate summary for this item?";
             }
+
+            if (select) {
+                select.value = "caption";
+            }
+
             modal.classList.remove('hidden');
         }
 
@@ -2565,12 +3383,308 @@
         }
         if (yesBtn) {
             yesBtn.onclick = () => {
-                if (pendingId) run('summarize', Array.isArray(pendingId) ? [...pendingId] : [pendingId]);
+                const sourcePreference =
+                    document.getElementById("summary-source-preference")?.value || "caption";
+
+                if (pendingId) {
+                    run(
+                        'summarize',
+                        Array.isArray(pendingId) ? [...pendingId] : [pendingId],
+                        sourcePreference
+                    );
+                }
+
                 closeConfirm();
             };
         }
         if (noBtn) {
             noBtn.onclick = closeConfirm;
+        }
+
+        let detMediaFiles = [];
+        let detMediaIndex = 0;
+
+        function renderMeetingMediaItem(m, mediaFile, index, total) {
+            const mediaCard = document.getElementById('det-media-card');
+            const mediaNav = document.getElementById('det-media-nav');
+            const mediaIndex = document.getElementById('det-media-index');
+            const prevBtn = document.getElementById('det-media-prev');
+            const nextBtn = document.getElementById('det-media-next');
+
+            if (!mediaFile) {
+                mediaCard.style.display = 'none';
+                mediaNav.style.display = 'none';
+                return;
+            }
+
+            mediaCard.style.display = 'block';
+
+            const isVideo = mediaFile.file_type === 'video' || mediaFile.filename.toLowerCase().includes('video');
+            const mediaUrl = `/api/meetings/file/${m.date}/${mediaFile.filename}`;
+
+            document.getElementById('det-media-title').textContent = isVideo ? 'Video recording' : 'Audio recording';
+            document.getElementById('det-media-tag').textContent = isVideo ? 'video/webm' : 'audio/webm';
+            document.getElementById('det-media-meta').textContent = `${mediaFile.filename} · ${fmtS(mediaFile.size_bytes)}`;
+
+            const vid = document.getElementById('det-video');
+            const audioWrap = document.getElementById('det-audio-wrap');
+            const audio = document.getElementById('det-audio');
+            const audioLabel = document.getElementById('det-audio-label');
+
+            // stop old playback before switching
+            try {
+                vid.pause();
+                audio.pause();
+            } catch (e) { }
+
+            if (isVideo) {
+                audioWrap.style.display = 'none';
+                vid.style.display = 'block';
+                vid.src = mediaUrl;
+                vid.load();
+            } else {
+                vid.style.display = 'none';
+                vid.removeAttribute('src');
+                try { vid.load(); } catch (e) { }
+
+                audioWrap.style.display = 'block';
+                audio.src = mediaUrl;
+                audio.load();
+                audioLabel.textContent = mediaFile.filename;
+            }
+
+            if (total > 1) {
+                mediaNav.style.display = 'flex';
+                mediaIndex.textContent = `${index + 1} / ${total}`;
+                prevBtn.disabled = index === 0;
+                nextBtn.disabled = index === total - 1;
+            } else {
+                mediaNav.style.display = 'none';
+            }
+        }
+
+        function bindMeetingMediaNav(m) {
+            const prevBtn = document.getElementById('det-media-prev');
+            const nextBtn = document.getElementById('det-media-next');
+
+            prevBtn.onclick = () => {
+                if (detMediaIndex > 0) {
+                    detMediaIndex -= 1;
+                    renderMeetingMediaItem(m, detMediaFiles[detMediaIndex], detMediaIndex, detMediaFiles.length);
+                }
+            };
+
+            nextBtn.onclick = () => {
+                if (detMediaIndex < detMediaFiles.length - 1) {
+                    detMediaIndex += 1;
+                    renderMeetingMediaItem(m, detMediaFiles[detMediaIndex], detMediaIndex, detMediaFiles.length);
+                }
+            };
+        }
+
+        function getCurrentDetailMediaFile() {
+            if (!detMediaFiles.length) return null;
+            return detMediaFiles[detMediaIndex] || null;
+        }
+
+        async function transcribeCurrentMedia(meeting) {
+            const currentFile = getCurrentDetailMediaFile();
+            if (!currentFile) {
+                toast('No media file selected', 'w');
+                return;
+            }
+
+            const btn = document.getElementById('det-transcribe-btn');
+            const oldText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = 'Submitting…';
+
+            try {
+                const payload = {
+                    filename: currentFile.filename
+                };
+
+                const res = await POST(`/api/media-transcription/${meeting.meeting_id}`, payload);
+
+                toast(`Transcription submitted for ${currentFile.filename}`, 's');
+                console.log('🎤 transcription submit response', res);
+
+                await loadMeetingTranscriptions(meeting.meeting_id, true);
+            } catch (e) {
+                console.error('❌ transcription submit failed', e);
+                toast(`Transcription failed: ${e.message}`, 'e');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = oldText;
+            }
+        }
+
+        async function loadMeetingTranscriptions(meetingId, autoOpen = false) {
+            const header = document.getElementById('det-whisper-header');
+            const list = document.getElementById('det-whisper-list');
+            const loading = document.getElementById('det-whisper-loading');
+            const empty = document.getElementById('det-whisper-empty');
+
+            try {
+                loading.style.display = 'block';
+                empty.style.display = 'none';
+                list.style.display = 'none';
+                header.style.display = 'none';
+                list.innerHTML = '';
+
+                const rows = await GET(`/api/media-transcription/${meetingId}`);
+                detTranscriptions = Array.isArray(rows) ? rows : [];
+
+                renderMeetingTranscriptions();
+            } catch (e) {
+                console.error('❌ load transcriptions failed', e);
+                loading.style.display = 'none';
+                header.style.display = 'none';
+                list.style.display = 'none';
+                empty.style.display = 'block';
+                empty.textContent = 'Failed to load Whisper transcripts';
+            }
+        }
+
+        function confirmTranscription({ filename, type }) {
+            return new Promise((resolve) => {
+                const isVideo = type === 'video';
+
+                const title = 'Transcribe media';
+                const message = isVideo
+                    ? 'This video will be converted to audio before transcription.'
+                    : 'This audio will be sent for transcription.';
+
+                const body = `
+                    <div style="display:flex;flex-direction:column;gap:10px">
+                        <div style="font-size:13px;color:var(--ink2)">${message}</div>
+                        <div style="font-size:12px;font-family:monospace;color:var(--ink3)">
+                            ${escapeHtml(filename)}
+                        </div>
+                        <div style="display:flex;gap:8px;margin-top:10px">
+                            <button id="confirm-transcribe-btn" class="btn btn-k">Continue</button>
+                            <button id="cancel-transcribe-btn" class="btn">Cancel</button>
+                        </div>
+                    </div>
+                `;
+
+                $('mh').textContent = title;
+                $('md').textContent = 'Confirm transcription';
+                $('mbody').innerHTML = body;
+                $('ov').style.display = 'flex';
+
+                document.getElementById('confirm-transcribe-btn').onclick = () => {
+                    $('ov').style.display = 'none';
+                    resolve(true);
+                };
+
+                document.getElementById('cancel-transcribe-btn').onclick = () => {
+                    $('ov').style.display = 'none';
+                    resolve(false);
+                };
+            });
+        }
+
+        function renderMeetingTranscriptions() {
+            const header = document.getElementById('det-whisper-header');
+            const list = document.getElementById('det-whisper-list');
+            const loading = document.getElementById('det-whisper-loading');
+            const empty = document.getElementById('det-whisper-empty');
+            const search = document.getElementById('det-whisper-search');
+
+            loading.style.display = 'none';
+
+            if (!detTranscriptions.length) {
+                header.style.display = 'none';
+                list.style.display = 'none';
+                empty.style.display = 'block';
+                empty.textContent = 'No Whisper transcripts found for this meeting';
+                return;
+            }
+
+            const completedCount = detTranscriptions.filter(t => t.status === 'completed').length;
+
+            document.getElementById('det-whisper-count').textContent = detTranscriptions.length;
+            document.getElementById('det-whisper-completed').textContent = completedCount;
+
+            header.style.display = 'flex';
+            empty.style.display = 'none';
+            list.style.display = 'flex';
+
+            const renderRows = (query = '') => {
+                const q = (query || '').toLowerCase();
+
+                const filtered = detTranscriptions.filter(t => {
+                    const hay =
+                        `${t.source_filename || ''} ${t.transcript_text || ''} ${t.status || ''}`.toLowerCase();
+                    return !q || hay.includes(q);
+                });
+
+                if (!filtered.length) {
+                    list.innerHTML = `<div class="muted">No Whisper transcripts match your search</div>`;
+                    return;
+                }
+
+                list.innerHTML = filtered.map(t => {
+                    const statusCls =
+                        t.status === 'completed' ? 't' :
+                            t.status === 'failed' ? 'a' : 'b';
+
+                    const preview = t.transcript_text
+                        ? escapeHtml(t.transcript_text).slice(0, 280)
+                        : 'No transcript text yet';
+
+                    return `
+                <div style="border:1px solid var(--rule);border-radius:8px;padding:10px 12px;background:var(--paper)">
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+                        <span class="tag ${statusCls}">${t.status || 'unknown'}</span>
+                        <span style="font-size:11px;font-family:monospace;color:var(--ink2)">${t.source_filename || '—'}</span>
+                        <span style="font-size:11px;color:var(--ink3);margin-left:auto">${fmt(t.created_at)}</span>
+                    </div>
+                    <div style="font-size:12px;color:var(--ink2);line-height:1.5;white-space:pre-wrap">${preview}</div>
+                    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+                        <button class="btn" type="button" onclick="openTranscriptionText(${t.id})">View full text</button>
+                    </div>
+                </div>
+            `;
+                }).join('');
+            };
+
+            renderRows(search?.value || '');
+
+            if (search) {
+                search.oninput = (e) => renderRows(e.target.value);
+            }
+        }
+
+        function openTranscriptionText(id) {
+            const row = detTranscriptions.find(x => x.id === id);
+            if (!row) return;
+
+            $('mh').textContent = 'Media transcription';
+            $('md').textContent = row.source_filename || 'Transcript result';
+            const text = row.transcript_text || row.error || 'No text available'
+            $('mbody').innerHTML = `
+                <div style="display:flex;flex-direction:column;gap:10px">
+                    <div style="display:flex;gap:8px;flex-wrap:wrap">
+                        <span class="tag ${row.status === 'completed' ? 't' : row.status === 'failed' ? 'a' : 'b'}">${row.status}</span>
+                        <span class="tag b">${row.source_file_type || 'media'}</span>
+                        <span class="tag p">${row.provider || 'whisper'}</span>
+                    </div>
+                    <div style="font-size:12px;color:var(--ink2);white-space:pre-wrap;line-height:1.6;border:1px solid var(--rule);border-radius:8px;padding:12px;background:var(--paper)">${escapeHtml(text.trim())}</div>
+                </div>
+            `;
+            $('ov').style.display = 'flex';
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .trim()
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
         }
 
         function renderDetail(m, id) {
@@ -2656,26 +3770,51 @@
 
             // ── media ──
             const mediaCard = document.getElementById('det-media-card');
-            const webmFile = m.files.find(f => f.filename.endsWith('.webm'));
-            if (webmFile) {
-                mediaCard.style.display = 'block';
-                const isVideo = webmFile.file_type === 'video' || webmFile.filename.includes('video');
-                const mediaUrl = `/api/meetings/file/${m.date}/${webmFile.filename}`;
-                document.getElementById('det-media-title').textContent = isVideo ? 'Video recording' : 'Audio recording';
-                document.getElementById('det-media-tag').textContent = isVideo ? 'video/webm' : 'audio/webm';
-                document.getElementById('det-media-meta').textContent = `${webmFile.filename} · ${fmtS(webmFile.size_bytes)}`;
-                if (isVideo) {
-                    const vid = document.getElementById('det-video');
-                    vid.style.display = 'block'; vid.src = mediaUrl;
-                    document.getElementById('det-audio-wrap').style.display = 'none';
-                } else {
-                    document.getElementById('det-audio-wrap').style.display = 'block';
-                    document.getElementById('det-video').style.display = 'none';
-                    document.getElementById('det-audio').src = mediaUrl;
-                    document.getElementById('det-audio-label').textContent = webmFile.filename;
-                }
-            } else { mediaCard.style.display = 'none'; }
 
+            detMediaFiles = (m.files || []).filter(f =>
+                f.filename && f.filename.toLowerCase().endsWith('.webm')
+            );
+
+            detMediaIndex = 0;
+
+            if (detMediaFiles.length) {
+                bindMeetingMediaNav(m);
+                renderMeetingMediaItem(m, detMediaFiles[detMediaIndex], detMediaIndex, detMediaFiles.length);
+            } else {
+                mediaCard.style.display = 'none';
+                const mediaNav = document.getElementById('det-media-nav');
+                if (mediaNav) mediaNav.style.display = 'none';
+            }
+            const mediaActions = document.getElementById('det-media-actions');
+            const transcribeBtn = document.getElementById('det-transcribe-btn');
+
+            if (detMediaFiles.length) {
+                mediaActions.style.display = 'flex';
+
+                transcribeBtn.onclick = async () => {
+                    const currentFile = getCurrentDetailMediaFile();
+                    if (!currentFile) {
+                        toast('No media file selected', 'w');
+                        return;
+                    }
+
+                    const mediaType =
+                        currentFile.file_type === 'video' || currentFile.filename.toLowerCase().includes('video')
+                            ? 'video'
+                            : 'audio';
+
+                    const confirmed = await confirmTranscription({
+                        filename: currentFile.filename,
+                        type: mediaType
+                    });
+
+                    if (!confirmed) return;
+
+                    await transcribeCurrentMedia(m);
+                };
+            } else {
+                mediaActions.style.display = 'none';
+            }
             // ════════════════════════════════
             // TAB 1 — OVERVIEW
             // ════════════════════════════════
@@ -3015,11 +4154,17 @@
                     `;
             } catch (e) { $('mbody').innerHTML = `<div style="color:var(--cc);padding:20px">Error: ${e.message}</div>`; }
         }
-        function closeModal() { $('ov').classList.remove('open'); }
+        function closeModal() {
+            const ov = $('ov');
+            if (ov) {
+                ov.classList.remove('open');
+                ov.style.display = 'none';
+            }
+        }
         function maybeClose(e) { if (e.target === $('ov')) closeModal(); }
 
         // pipeline
-        async function run(mode, meeting_ids = null) {
+        async function run(mode, meeting_ids = null, sourcePreference = "caption") {
             const panel = $('jpanel'), term = $('jterm'), title = $('jtitle'), tag = $('jtag');
             let filePaths = [];
             let isSingle = false;
@@ -3052,6 +4197,7 @@
             const payload = {
                 mode,
                 force: false,
+                source_preference: sourcePreference,
                 ...(meeting_ids ? { meeting_ids } : {}),
                 ...(filePaths.length ? { file_paths: filePaths } : {}),
                 ...(isSingle ? { file_path: filePaths[0] } : {}),
@@ -3071,18 +4217,31 @@
                     if (s.status === 'completed') {
                         clearInterval(_poll);
                         const hasFailures = s.output?.includes('❌');
+
                         tag.className = `tag ${hasFailures ? 'a' : 't'}`;
                         tag.textContent = hasFailures ? 'partial' : 'completed';
                         title.textContent = `${mode} — ${hasFailures ? 'partial' : 'done'}`;
-                        toast(`Job ${s.job_id} ${hasFailures ? 'completed with errors' : 'completed'}`, hasFailures ? 'w' : 's');
+
+                        toast(
+                            `Job ${s.job_id} ${hasFailures ? 'completed with errors' : 'completed'}`,
+                            hasFailures ? 'w' : 's'
+                        );
+
+                        if (hasFailures) {
+                            openJobResultModal(s, `${mode} — completed with errors`);
+                        }
+
                         boot();
-                        if (meeting_ids) route()
+                        if (meeting_ids) route();
                     } else if (s.status === 'failed') {
                         clearInterval(_poll);
+
                         tag.className = 'tag c';
                         tag.textContent = 'failed';
                         title.textContent = `${mode} — failed`;
+
                         toast(`Job ${job.job_id} failed`, 'e');
+                        openJobResultModal(s, `${mode} — failed`);
                     }
                 }, 2000);
 
@@ -3105,7 +4264,31 @@
                 </tr>`).join('') : `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--ink3)">No jobs run this session</td></tr>`;
         }
 
+        function openJobResultModal(job, titleText) {
+            $('mh').textContent = titleText || `Job ${job.job_id}`;
+            $('md').textContent = `${job.mode} · ${job.status}`;
+
+            const body = job.output || job.error || 'No output.';
+            $('mbody').innerHTML = `
+                <div style="display:flex;flex-direction:column;gap:12px">
+                    <div style="display:flex;gap:8px;flex-wrap:wrap">
+                        <span class="tag b">ID: ${job.job_id}</span>
+                        <span class="tag p">${job.mode}</span>
+                        <span class="tag ${job.status === 'failed' ? 'c' : 'a'}">${job.status}</span>
+                    </div>
+                    <div class="term" style="max-height:360px">${body}</div>
+                </div>
+            `;
+
+            $('ov').classList.add('open');
+        }
+
         async function openJob(id) {
+            const j = await GET(`/api/pipeline/jobs/${id}`);
+            openJobResultModal(j, `Job ${id}`);
+        }
+
+        async function openJobOld(id) {
             const j = await GET(`/api/pipeline/jobs/${id}`);
             $('mh').textContent = `Job ${id}`; $('md').textContent = `${j.mode} · ${j.status}`;
             $('mbody').innerHTML = `<div class="term">${j.output || j.error || 'No output.'}</div>`;
@@ -3180,6 +4363,7 @@
         }
         route();
         boot();
+        startNotificationPolling();
     </script>
 </body>
 

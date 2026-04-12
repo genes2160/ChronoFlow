@@ -27,7 +27,11 @@ MODEL_MAP = {
     "together": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
     "anthropic": "claude-sonnet-4-6",
 }
+WHISPER_SERVICE_URL = os.getenv("WHISPER_SERVICE_URL")
+WHISPER_CALLBACK_BASE_URL = os.getenv("WHISPER_CALLBACK_BASE_URL")
+MEDIA_TMP_DIR = Path(os.getenv("MEDIA_TMP_DIR", "data/tmp_media"))
 
+MEDIA_TMP_DIR.mkdir(parents=True, exist_ok=True)
 LOG_DIR.mkdir(exist_ok=True)
 ORG_DIR.mkdir(parents=True, exist_ok=True)
 RAW_DIR.mkdir(parents=True, exist_ok=True)
