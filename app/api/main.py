@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import os
 
-from app.api.routes import media_transcription, meetings, pipeline, analytics, notifications
+from app.api.routes import llm_logs, media_transcription, meetings, pipeline, analytics, notifications, prompts
 from app.api.core.config import settings
 from app.api.core.logging import configure_logging
 from app.api.core.db import create_tables
@@ -56,7 +56,8 @@ app.include_router(pipeline.router,  prefix="/api/pipeline",  tags=["Pipeline"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["Analytics"])
 app.include_router(media_transcription.router, prefix="/api/media-transcription", tags=["Media Transcription"])
 app.include_router(notifications.router, prefix="/api/notifications", tags=["notifications"])
-
+app.include_router(prompts.router, prefix="/api/prompts", tags=["Prompts"])
+app.include_router(llm_logs.router, prefix="/api/llm-logs", tags=["LLM Logs"])
 # Serve static dashboard
 static_dir = os.path.join(os.path.dirname(__file__), "static")
 if os.path.exists(static_dir):
